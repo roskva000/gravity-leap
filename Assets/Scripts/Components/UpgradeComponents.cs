@@ -8,10 +8,18 @@ namespace GalacticNexus.Scripts.Components
         public int DroneSpeedLevel;
         public int DroneBatteryLevel;
         public int SolarCollectorLevel;
+        public int ShieldLevel;
         public Entity DockPrefab;
 
         public float GetDroneSpeedBonus() => DroneSpeedLevel * 0.5f;
         public float GetBatteryEfficiency() => DroneBatteryLevel * 0.1f;
+    }
+
+    public struct ShieldData : IComponentData
+    {
+        public float Integrity;
+        public float MaxIntegrity;
+        public bool IsActive;
     }
 
     public struct UpgradeRequest : IComponentData
@@ -24,6 +32,7 @@ namespace GalacticNexus.Scripts.Components
         DockCapacity,
         DroneSpeed,
         DroneBattery,
-        SolarCollector
+        SolarCollector,
+        Shield
     }
 }

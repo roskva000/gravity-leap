@@ -16,6 +16,8 @@ namespace GalacticNexus.Scripts.Components
         public float SindicatoMultiplier;
         public float TheCoreMultiplier;
         public float VoidWalkersMultiplier;
+        public bool IsRaidActive;
+        public float RaidTimer;
     }
 
     public struct RewardData : IComponentData

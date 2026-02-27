@@ -92,6 +92,9 @@ namespace GalacticNexus.Scripts.Juice
                     // Task L: Field Repair
                     else if (e.Value == 999f)
                         SpawnFloatingText(e.Position, "REPAIRED", false);
+                    // Task M: Syndicate Raid
+                    else if (e.Value == 666f)
+                        SpawnFloatingText(e.Position, "SYNDICATE RAID!", true);
                     else
                         SpawnFloatingText(e.Position, "WARNING", true);
                     break;

@@ -23,7 +23,9 @@ namespace GalacticNexus.Scripts.Systems
             {
                 SindicatoMultiplier = 1.0f,
                 TheCoreMultiplier = 1.0f,
-                VoidWalkersMultiplier = 1.0f
+                VoidWalkersMultiplier = 1.0f,
+                IsRaidActive = false,
+                RaidTimer = 0
             });
         }
 

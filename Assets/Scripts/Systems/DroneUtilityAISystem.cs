@@ -63,11 +63,17 @@ namespace GalacticNexus.Scripts.Systems
             }
 
             // Job'u oluştur ve çalıştır
+            SystemAPI.TryGetSingleton<GlobalMarketData>(out var market);
+            SystemAPI.TryGetSingletonRW<ShieldData>(out var shield);
+
             var droneJob = new DroneUtilityJob
             {
                 ShipsData = activeShipsData,
                 ShipsPositions = activeShipsPositions,
                 ShipsEntities = activeShipsEntities,
+                IsRaidActive = market.IsRaidActive,
+                ShieldIntegrity = shield.IsValid ? shield.ValueRO.Integrity : 100f,
+                ShieldMaxIntegrity = shield.IsValid ? shield.ValueRO.MaxIntegrity : 100f,
                 ECB = SystemAPI.GetSingleton<BeginSimulationEntityCommandBufferSystem.Singleton>().CreateCommandBuffer(state.WorldUnmanaged).AsParallelWriter()
             };
 
@@ -86,25 +92,34 @@ namespace GalacticNexus.Scripts.Systems
         [ReadOnly] public NativeArray<ShipData> ShipsData;
         [ReadOnly] public NativeArray<float3> ShipsPositions;
         [ReadOnly] public NativeArray<Entity> ShipsEntities;
+        public bool IsRaidActive;
+        public float ShieldIntegrity;
+        public float ShieldMaxIntegrity;
         public EntityCommandBuffer.ParallelWriter ECB;
 
         public void Execute(Entity entity, [ChunkIndexInQuery] int chunkIndex, RefRW<DroneData> droneData, in LocalTransform droneTransform)
         {
-            // Drone meşgulse veya şarjı azsa atla
             if (droneData.ValueRO.IsBusy || droneData.ValueRO.CurrentState == DroneState.Charging) return;
 
-            // Task B: Low Battery Warning trigger
             if (droneData.ValueRO.BatteryLevel < 0.2f)
             {
                 droneData.ValueRW.CurrentState = DroneState.Charging;
-                
-                // Fire Low Battery Warning Event
                 ECB.AddComponent(chunkIndex, ECB.CreateEntity(chunkIndex), new GameEvent
                 {
                     Type = GameEventType.Warning,
                     Position = droneTransform.Position,
-                    Value = 0f // 0 for battery warning
+                    Value = 0f 
                 });
+                return;
+            }
+
+            // Task N: Shield Hub Prioritization (If < 50%)
+            if (ShieldIntegrity < ShieldMaxIntegrity * 0.5f)
+            {
+                droneData.ValueRW.CurrentTargetEntity = Entity.Null; // No specific entity for hub
+                droneData.ValueRW.IsBusy = true;
+                droneData.ValueRW.CurrentState = DroneState.Working;
+                droneData.ValueRW.TargetPosition = float3.zero; // Station Center
                 return;
             }
 
@@ -138,9 +153,16 @@ namespace GalacticNexus.Scripts.Systems
             float distance = math.distance(dronePos, shipPos);
             float distanceFactor = math.clamp(1.0f - (distance / 100f), 0, 1);
             
-            // Task B: Increased priority for VoidWalkers (1.2 -> 1.5)
             float fractionPriority = ship.OwnerFraction == Fraction.VoidWalkers ? 1.5f : 1.0f;
-            float urgency = (1.0f - ship.Fuel) + (1.0f - ship.RepairProgress);
+            
+            // Task O: Raid Prioritization for damaged ships
+            float integrityUrgency = 0;
+            if (IsRaidActive && ship.HullIntegrity < 0.2f)
+            {
+                integrityUrgency = (1.0f - ship.HullIntegrity) * 3.0f;
+            }
+            
+            float urgency = (1.0f - ship.Fuel) + (1.0f - ship.RepairProgress) + integrityUrgency;
             
             return (distanceFactor * 0.4f) + (urgency * 0.4f) * fractionPriority;
         }

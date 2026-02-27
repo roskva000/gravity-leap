@@ -19,6 +19,28 @@ namespace GalacticNexus.Scripts.Systems
 
             var ecb = SystemAPI.GetSingleton<BeginSimulationEntityCommandBufferSystem.Singleton>().CreateCommandBuffer(state.WorldUnmanaged);
 
+            // Task O & N: Shield Maintenance
+            if (SystemAPI.TryGetSingletonRW<ShieldData>(out var shield))
+            {
+                // Passive Regeneration from Solar Collectors
+                float passiveRegen = upgrade.SolarCollectorLevel * 0.1f * deltaTime;
+                shield.ValueRW.Integrity = math.min(shield.ValueRO.MaxIntegrity, shield.ValueRO.Integrity + passiveRegen);
+
+                // Active Repair by Drones at center (0,0,0)
+                foreach (var (droneTransform, droneData) in SystemAPI.Query<LocalTransform, RefRW<DroneData>>().WithAll<DroneTag>())
+                {
+                    if (droneData.ValueRO.CurrentState == DroneState.Working && 
+                        math.distance(droneTransform.Position, float3.zero) < 1.0f)
+                    {
+                        float repairPower = droneData.ValueRO.IsOverclocked ? 5.0f : 2.0f;
+                        shield.ValueRW.Integrity = math.min(shield.ValueRO.MaxIntegrity, shield.ValueRO.Integrity + repairPower * deltaTime);
+                        
+                        // Work consumes battery
+                        droneData.ValueRW.BatteryLevel -= deltaTime * 0.05f * batteryEfficiency;
+                    }
+                }
+            }
+
             foreach (var (transform, droneData) in SystemAPI.Query<RefRW<LocalTransform>, RefRW<DroneData>>().WithAll<DroneTag>())
             {
                 if (droneData.ValueRO.IsMalfunctioning) continue;
