@@ -37,9 +37,10 @@ namespace GalacticNexus.Scripts.Systems
                         Health = 100f,
                         Fuel = rand.NextFloat(0.1f, 0.5f), // Yarım depo gelmiş
                         CargoCapacity = 1000f,
-                        CurrentState = ShipState.Approaching,
+                        CurrentState = ShipState.Waiting,
                         OwnerFraction = randomFraction,
                         RepairProgress = 0f
+                        // TargetDockPosition DockManagementSystem tarafından atanacak
                     });
 
                     // Ödül verisini ekle (Dinamik ekonomik veri)

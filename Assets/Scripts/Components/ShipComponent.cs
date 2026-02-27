@@ -10,13 +10,17 @@ namespace GalacticNexus.Scripts.Components
         public float Health;
         public float Fuel;
         public float CargoCapacity;
-        public float RepairProgress;
         public ShipState CurrentState;
         public Fraction OwnerFraction;
+        public float RepairProgress;
+        
+        // Yanaşılacak dock'un koordinatları
+        public float3 TargetDockPosition;
     }
 
     public enum ShipState
     {
+        Waiting,
         Approaching,
         Docked,
         Servicing,
