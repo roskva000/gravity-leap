@@ -70,6 +70,12 @@ namespace GalacticNexus.Scripts.Juice
                     }
                     break;
                     
+                case GameEventType.DroneBoost:
+                    // Task F: Ready alert
+                    if (e.Value == 1.0f)
+                        SpawnFloatingText(e.Position, "READY", false); // Green pulse?
+                    break;
+
                 case GameEventType.Warning:
                     // Task B: Low Battery Warning
                     if (e.Value == 0f) // Battery alert indicator

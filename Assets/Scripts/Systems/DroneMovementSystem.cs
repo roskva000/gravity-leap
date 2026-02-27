@@ -24,14 +24,24 @@ namespace GalacticNexus.Scripts.Systems
                 // Durum Yönetimi (FSM)
                 if (droneData.ValueRO.CurrentState == DroneState.Charging)
                 {
-                    // Şarj ol (0.2f per second)
-                    droneData.ValueRW.BatteryLevel = math.min(1.0f, droneData.ValueRO.BatteryLevel + deltaTime * 0.2f);
+                    // Görev F: Solar Collector şarj olma hızı (0.2f * SolarCollectorLevel)
+                    float chargeRate = 0.2f * math.max(1, upgrade.SolarCollectorLevel);
+                    droneData.ValueRW.BatteryLevel = math.min(1.0f, droneData.ValueRO.BatteryLevel + deltaTime * chargeRate);
                     
-                    // Şarj bittiğinde bayrağı sıfırla
+                    // Şarj bittiğinde bayrağı sıfırla ve READY fırlat
                     if (droneData.ValueRO.BatteryLevel >= 1.0f)
                     {
                         droneData.ValueRW.CurrentState = DroneState.Idle;
                         droneData.ValueRW.WasBatteryWarningSent = false;
+
+                        // READY Juice Event
+                        var readyEvent = ecb.CreateEntity();
+                        ecb.AddComponent(readyEvent, new GameEvent
+                        {
+                            Type = GameEventType.DroneBoost, // Use DroneBoost for "READY" visual
+                            Position = transform.ValueRO.Position,
+                            Value = 1.0f // Indicator for Ready
+                        });
                     }
                     
                     // Şarj noktasına git (Merkez)

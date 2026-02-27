@@ -28,6 +28,7 @@ namespace GalacticNexus.Scripts.Components
         public ShipCondition Condition;
         public float HullIntegrity;
         public float MoveSpeed;
+        public int RequiredDroneCount;
         
         // Yanaşılacak dock'un koordinatları ve referansı
         public float3 TargetDockPosition;
@@ -41,7 +42,8 @@ namespace GalacticNexus.Scripts.Components
         Docked,
         Servicing,
         Taxes,
-        Departing
+        Departing,
+        Wreck
     }
 
     public enum ShipCondition

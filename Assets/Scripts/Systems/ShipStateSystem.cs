@@ -63,17 +63,20 @@ namespace GalacticNexus.Scripts.Systems
                         break;
 
                     case ShipState.Servicing:
-                        // Task C: Dynamic Repair Speed based on drone count
+                    case ShipState.Wreck:
+                        // Task E & C: Dynamic Repair Speed based on drone count and requirements
                         int activeDrones = 0;
                         droneCounts.TryGetValue(entity, out activeDrones);
                         
-                        if (activeDrones > 0)
+                        // Gereksinim kontrolü (Wreck için 2, Normal/Kritik için 1)
+                        if (activeDrones >= shipData.ValueRO.RequiredDroneCount)
                         {
                             float baseRepairRate = 0.2f;
+                            // Wreck daha zor tamir edilsin? (Hız / 2?) - Not explicitly asked but 2 drones makes it 0.4 anyway.
                             shipData.ValueRW.RepairProgress += deltaTime * baseRepairRate * activeDrones;
                         }
 
-                        // Task A: driving _RustAmount (1.0 - RepairProgress)
+                        // Task A: driving _RustAmount
                         rust.ValueRW.Value = math.saturate(1.0f - shipData.ValueRO.RepairProgress);
                         
                         // Neon power stabilization

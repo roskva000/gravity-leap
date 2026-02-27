@@ -34,6 +34,13 @@ namespace GalacticNexus.Scripts.Systems
                         finalReward *= 3.0;
                     }
 
+                    // Task E: Wreck state (0 integrity) gives 500% more reward
+                    // Since it transitions to Taxes from Wreck, we check RequiredDroneCount as a proxy or just HullIntegrity
+                    if (ship.ValueRO.HullIntegrity <= 0.05f)
+                    {
+                        finalReward *= 5.0;
+                    }
+
                     economy.ValueRW.ScrapCurrency += finalReward;
                     economy.ValueRW.TotalShipsServiced++;
 

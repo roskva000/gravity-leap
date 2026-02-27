@@ -6,6 +6,8 @@ namespace GalacticNexus.Scripts.Authoring
 {
     public class StationManagerAuthoring : MonoBehaviour
     {
+        public GameObject DockPrefab;
+
         public class StationManagerBaker : Baker<StationManagerAuthoring>
         {
             public override void Bake(StationManagerAuthoring authoring)
@@ -17,7 +19,8 @@ namespace GalacticNexus.Scripts.Authoring
                     DockLevel = 1,
                     DroneSpeedLevel = 1,
                     DroneBatteryLevel = 1,
-                    SolarCollectorLevel = 1
+                    SolarCollectorLevel = 1,
+                    DockPrefab = GetEntity(authoring.DockPrefab, TransformUsageFlags.Dynamic)
                 });
 
                 AddComponent(entity, new MonetizationData

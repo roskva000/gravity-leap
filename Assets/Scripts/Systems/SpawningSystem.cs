@@ -65,7 +65,8 @@ namespace GalacticNexus.Scripts.Systems
                         RepairProgress = 0f,
                         Condition = isCritical ? ShipCondition.Critical : ShipCondition.Normal,
                         HullIntegrity = isCritical ? 0.3f : 1.0f,
-                        MoveSpeed = isCritical ? 2.5f : 5.0f
+                        MoveSpeed = isCritical ? 2.5f : 5.0f,
+                        RequiredDroneCount = 1
                         // TargetDockPosition DockManagementSystem tarafından atanacak
                     });
 
