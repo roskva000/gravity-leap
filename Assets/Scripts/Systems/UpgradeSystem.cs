@@ -19,7 +19,7 @@ namespace GalacticNexus.Scripts.Systems
             // Gelen yükseltme isteklerini işle
             foreach (var (request, entity) in SystemAPI.Query<UpgradeRequest, Entity>())
             {
-                float cost = CalculateCost(request.Type, upgrade.ValueRO);
+                double cost = math.floor(CalculateCost(request.Type, upgrade.ValueRO));
 
                 if (economy.ValueRO.ScrapCurrency >= cost)
                 {
@@ -36,8 +36,8 @@ namespace GalacticNexus.Scripts.Systems
         {
             return type switch
             {
-                UpgradeType.DroneSpeed => 100f * (current.DroneSpeedLevel + 1),
-                UpgradeType.DockCapacity => 500f * (current.DockLevel + 1),
+                UpgradeType.DroneSpeed => 100f * math.pow(1.15f, current.DroneSpeedLevel),
+                UpgradeType.DockCapacity => 500f * math.pow(1.5f, current.DockLevel),
                 _ => 200f
             };
         }

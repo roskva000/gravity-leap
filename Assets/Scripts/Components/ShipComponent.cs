@@ -14,8 +14,9 @@ namespace GalacticNexus.Scripts.Components
         public Fraction OwnerFraction;
         public float RepairProgress;
         
-        // Yanaşılacak dock'un koordinatları
+        // Yanaşılacak dock'un koordinatları ve referansı
         public float3 TargetDockPosition;
+        public Entity AssignedDockEntity;
     }
 
     public enum ShipState

@@ -26,8 +26,17 @@ namespace GalacticNexus.Scripts.Systems
                     economy.ValueRW.ScrapCurrency += finalReward;
                     economy.ValueRW.TotalShipsServiced++;
 
-                    // Gemiyi kalkışa gönder
+                    // Gemiyi ayrılma durumuna geçir
                     ship.ValueRW.CurrentState = ShipState.Departing;
+
+                    // Dock'u boşalt
+                    if (SystemAPI.HasComponent<DockData>(ship.ValueRO.AssignedDockEntity))
+                    {
+                        var dockData = SystemAPI.GetComponentRW<DockData>(ship.ValueRO.AssignedDockEntity);
+                        dockData.ValueRW.IsOccupied = false;
+                    }
+                    
+                    // Not: Yok etme işlemini artık ShipDespawnSystem yapacak
                 }
             }
         }

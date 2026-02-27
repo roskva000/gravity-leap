@@ -41,6 +41,7 @@ namespace GalacticNexus.Scripts.Systems
                     var dockRef = SystemAPI.GetComponentRW<DockData>(dockEntity);
                     
                     ship.ValueRW.TargetDockPosition = dockTransforms[dockIndex].Position;
+                    ship.ValueRW.AssignedDockEntity = dockEntity; // Referansı kaydet
                     ship.ValueRW.CurrentState = ShipState.Approaching;
                     dockRef.ValueRW.IsOccupied = true;
                     
