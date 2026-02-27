@@ -7,6 +7,8 @@ namespace GalacticNexus.Scripts.Components
         public double ScrapCurrency;
         public int TotalShipsServiced;
         public long LastSaveTimestamp;
+        public double DarkMatter;
+        public int PrestigeCount;
     }
 
     public struct RewardData : IComponentData

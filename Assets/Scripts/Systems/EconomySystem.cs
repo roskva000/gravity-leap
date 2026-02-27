@@ -1,6 +1,9 @@
 using Unity.Burst;
 using Unity.Entities;
 using GalacticNexus.Scripts.Components;
+using GalacticNexus.Scripts.Juice;
+using Unity.Mathematics;
+using Unity.Transforms;
 
 namespace GalacticNexus.Scripts.Systems
 {
@@ -21,10 +24,21 @@ namespace GalacticNexus.Scripts.Systems
             {
                 if (ship.ValueRO.CurrentState == ShipState.Taxes)
                 {
-                    // Geliri hesaba ekle
-                    double finalReward = reward.ValueRO.BaseReward * reward.ValueRO.FractionMultiplier;
+                    // Geliri hesaba ekle (Prestij Çarpanı Dahil)
+                    double prestigeMultiplier = 1.0 + (economy.ValueRO.DarkMatter * 0.10);
+                    double finalReward = reward.ValueRO.BaseReward * reward.ValueRO.FractionMultiplier * prestigeMultiplier;
+                    
                     economy.ValueRW.ScrapCurrency += finalReward;
                     economy.ValueRW.TotalShipsServiced++;
+
+                    // VFX Olayı Fırlat (Juice)
+                    var eventEntity = ecb.CreateEntity();
+                    ecb.AddComponent(eventEntity, new GameEvent
+                    {
+                        Type = GameEventType.ScrapEarned,
+                        Position = SystemAPI.GetComponent<LocalTransform>(entity).Position,
+                        Value = (float)finalReward
+                    });
 
                     // Gemiyi ayrılma durumuna geçir
                     ship.ValueRW.CurrentState = ShipState.Departing;

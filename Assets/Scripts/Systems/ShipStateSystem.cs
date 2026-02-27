@@ -2,6 +2,8 @@ using Unity.Burst;
 using Unity.Entities;
 using Unity.Transforms;
 using GalacticNexus.Scripts.Components;
+using GalacticNexus.Scripts.Juice;
+using Unity.Mathematics;
 
 namespace GalacticNexus.Scripts.Systems
 {
@@ -11,7 +13,7 @@ namespace GalacticNexus.Scripts.Systems
         [BurstCompile]
         public void OnUpdate(ref SystemState state)
         {
-            // Bu sistem gemilerin durum geçişlerini ve temel mantığını yönetecek.
+            var ecb = SystemAPI.GetSingleton<BeginSimulationEntityCommandBufferSystem.Singleton>().CreateCommandBuffer(state.WorldUnmanaged);
             float deltaTime = SystemAPI.Time.DeltaTime;
 
             foreach (var (shipData, transform) in SystemAPI.Query<RefRW<ShipData>, RefRW<LocalTransform>>())
@@ -33,6 +35,15 @@ namespace GalacticNexus.Scripts.Systems
                         {
                             shipData.ValueRW.CurrentState = ShipState.Docked;
                             transform.ValueRW.Position = target;
+
+                            // Juicing: Docked Event
+                            var eventEntity = ecb.CreateEntity();
+                            ecb.AddComponent(eventEntity, new GameEvent
+                            {
+                                Type = GameEventType.ShipDocked,
+                                Position = target,
+                                Value = 1.0f
+                            });
                         }
                         break;
 

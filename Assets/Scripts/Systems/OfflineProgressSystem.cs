@@ -1,6 +1,7 @@
 using Unity.Entities;
 using GalacticNexus.Scripts.Components;
 using GalacticNexus.Scripts.Persistence;
+using Unity.Mathematics;
 using System;
 using UnityEngine;
 
@@ -35,19 +36,47 @@ namespace GalacticNexus.Scripts.Systems
 
             if (deltaTicks > 0)
             {
-                double totalMinutes = TimeSpan.FromTicks(deltaTicks).TotalMinutes;
+                double totalSeconds = TimeSpan.FromTicks(deltaTicks).TotalSeconds;
+                double totalMinutes = totalSeconds / 60.0;
                 
-                // Hard-cap: Maksimum 24 saat (1440 dakika)
-                totalMinutes = Math.Min(totalMinutes, 1440.0);
+                // Hard-cap: Maksimum 24 saat
+                totalSeconds = Math.Min(totalSeconds, 86400.0);
+                totalMinutes = totalSeconds / 60.0;
 
-                // Formül: Dakika * (DockLevel * BazÖdül * DroneVerimi)
-                double avgRewardPerMin = 10.0; // Baz değer
+                // 1. Prestij Çarpanı
+                double prestigeMultiplier = 1.0 + (economy.ValueRO.DarkMatter * 0.10);
+
+                // 2. Reklam Boost Lojiği
+                double adMultiplier = 1.0;
+                if (SystemAPI.TryGetSingletonRW<MonetizationData>(out var monData))
+                {
+                    float boostRemaining = monData.ValueRO.AdBoostRemainingSeconds;
+                    
+                    if (boostRemaining > 0)
+                    {
+                        // Offline sürenin ne kadarı boostlu geçecek?
+                        double boostedSeconds = Math.Min(totalSeconds, (double)boostRemaining);
+                        double normalSeconds = totalSeconds - boostedSeconds;
+                        
+                        // Ağırlıklı çarpan hesapla (Örn: 1 saat offline, 30dk boost varsa -> 1.5x ortalama)
+                        adMultiplier = ((boostedSeconds * 2.0) + (normalSeconds * 1.0)) / totalSeconds;
+                        
+                        // Kalan süreyi güncelle
+                        monData.ValueRW.AdBoostRemainingSeconds = (float)Math.Max(0, boostRemaining - totalSeconds);
+                        if (monData.ValueRW.AdBoostRemainingSeconds <= 0) monData.ValueRW.LastAdMultiplier = 1.0f;
+                    }
+                }
+
+                // 3. Final Hesaplama
+                double avgRewardPerMin = 10.0; 
                 double efficiency = 1.0 + upgrade.DroneSpeedLevel * 0.1;
-                double offlineEarnings = totalMinutes * (upgrade.DockLevel * avgRewardPerMin * efficiency);
-
-                economy.ValueRW.ScrapCurrency += offlineEarnings;
+                double baseOfflineEarnings = totalMinutes * (upgrade.DockLevel * avgRewardPerMin * efficiency);
                 
-                Debug.Log($"Offline Progress: Welcome back Commander! You earned {offlineEarnings:F0} Scrap in {totalMinutes:F1} minutes.");
+                double finalOfflineEarnings = baseOfflineEarnings * prestigeMultiplier * adMultiplier;
+
+                economy.ValueRW.ScrapCurrency += finalOfflineEarnings;
+                
+                Debug.Log($"Offline Progress: Welcome back! You earned {finalOfflineEarnings:F0} Scrap ({totalMinutes:F1} min, Multi: {adMultiplier:F2}x).");
             }
             
             _isProcessed = true;

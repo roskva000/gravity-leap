@@ -19,7 +19,6 @@ namespace GalacticNexus.Scripts.Persistence
 
         private async void OnApplicationQuit()
         {
-            // Senkron çıkışı bloklamadan son bir deneme (veya Main thread dükkanı kapatmadan hızlıca)
             await SaveGameAsync();
         }
 
@@ -40,30 +39,33 @@ namespace GalacticNexus.Scripts.Persistence
                 
                 var em = world.EntityManager;
 
-                // ECS verilerini Main Thread'de oku
                 if (!em.TryGetSingleton<EconomyData>(out var economy)) return;
                 if (!em.TryGetSingleton<UpgradeData>(out var upgrade)) return;
                 
                 bool isNoAds = false;
+                float adBoost = 0f;
                 if (em.TryGetSingleton<MonetizationData>(out var monData))
                 {
                     isNoAds = monData.IsNoAdsPurchased;
+                    adBoost = monData.AdBoostRemainingSeconds;
                 }
 
                 var data = new GameSaveData
                 {
                     ScrapCurrency = economy.ScrapCurrency,
                     TotalShipsServiced = economy.TotalShipsServiced,
+                    DarkMatter = economy.DarkMatter,
+                    PrestigeCount = economy.PrestigeCount,
                     DockLevel = upgrade.DockLevel,
                     DroneSpeedLevel = upgrade.DroneSpeedLevel,
                     DroneBatteryLevel = upgrade.DroneBatteryLevel,
                     IsNoAdsPurchased = isNoAds,
+                    AdBoostRemainingSeconds = adBoost,
                     LastSaveTimestamp = DateTime.UtcNow.Ticks
                 };
 
                 string json = JsonUtility.ToJson(data);
 
-                // Asenkron dosya yazma
                 await Task.Run(async () =>
                 {
                     using (FileStream sourceStream = new FileStream(SavePath,
@@ -105,6 +107,8 @@ namespace GalacticNexus.Scripts.Persistence
                     economy.ValueRW.ScrapCurrency = data.ScrapCurrency;
                     economy.ValueRW.TotalShipsServiced = data.TotalShipsServiced;
                     economy.ValueRW.LastSaveTimestamp = data.LastSaveTimestamp;
+                    economy.ValueRW.DarkMatter = data.DarkMatter;
+                    economy.ValueRW.PrestigeCount = data.PrestigeCount;
                 }
 
                 if (em.TryGetSingletonRW<UpgradeData>(out var upgrade))
@@ -117,6 +121,9 @@ namespace GalacticNexus.Scripts.Persistence
                 if (em.TryGetSingletonRW<MonetizationData>(out var monData))
                 {
                     monData.ValueRW.IsNoAdsPurchased = data.IsNoAdsPurchased;
+                    monData.ValueRW.AdBoostRemainingSeconds = data.AdBoostRemainingSeconds;
+                    // Reset multiplier if loaded with 0 boost
+                    if (data.AdBoostRemainingSeconds <= 0) monData.ValueRW.LastAdMultiplier = 1.0f;
                 }
 
                 Debug.Log($"Game Loaded Successfully from {SavePath}");

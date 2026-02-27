@@ -1,6 +1,7 @@
 using UnityEngine;
 using Unity.Entities;
 using GalacticNexus.Scripts.Components;
+using Unity.Mathematics;
 
 namespace GalacticNexus.Scripts.Monetization
 {
@@ -17,8 +18,8 @@ namespace GalacticNexus.Scripts.Monetization
         public void ShowRewardedAd()
         {
             Debug.Log("Playing Rewarded Ad...");
-            // Reklam bittiğinde:
-            UpdateAdMultiplier(2.0f);
+            // Reklam bittiğinde: 4 Saatlik Boost Ver
+            UpdateAdMultiplier(2.0f, 14400f);
         }
 
         public void PurchaseNoAds()
@@ -31,11 +32,13 @@ namespace GalacticNexus.Scripts.Monetization
             }
         }
 
-        private void UpdateAdMultiplier(float multiplier)
+        private void UpdateAdMultiplier(float multiplier, float duration)
         {
             if (_em.TryGetSingletonRW<MonetizationData>(out var monData))
             {
                 monData.ValueRW.LastAdMultiplier = multiplier;
+                // Süreyi ekle ve 24 saatle sınırla
+                monData.ValueRW.AdBoostRemainingSeconds = math.min(86400f, monData.ValueRO.AdBoostRemainingSeconds + duration);
             }
         }
     }

@@ -13,8 +13,13 @@ namespace GalacticNexus.Scripts.Persistence
         public int DroneSpeedLevel;
         public int DroneBatteryLevel;
 
+        // Prestige
+        public double DarkMatter;
+        public int PrestigeCount;
+
         // Monetization
         public bool IsNoAdsPurchased;
+        public float AdBoostRemainingSeconds;
 
         // Offline timing
         public long LastSaveTimestamp;
