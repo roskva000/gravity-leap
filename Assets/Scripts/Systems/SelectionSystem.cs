@@ -3,49 +3,53 @@ using Unity.Transforms;
 using Unity.Mathematics;
 using UnityEngine;
 using GalacticNexus.Scripts.Components;
+using Unity.Physics;
 
 namespace GalacticNexus.Scripts.Systems
 {
-    public partial class SelectionSystem : SystemBase
+    // BurstCompile eklenmedi çünkü UnityEngine.Camera kullanılıyor.
+    public partial struct SelectionSystem : ISystem
     {
-        protected override void OnUpdate()
+        public void OnUpdate(ref SystemState state)
         {
             // Sol tık veya dokunma kontrolü
             if (!Input.GetMouseButtonDown(0)) return;
 
-            // Kamera üzerinden Raycast (Hybrid yaklaşım)
-            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+            if (Camera.main == null) return;
+
+            // Kamera üzerinden Raycast
+            UnityEngine.Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
             
-            // Tüm gemileri dolaş ve en yakını bul (Şimdilik basit mesafe kontrolü)
-            // Not: Gerçek projede Physics World Raycast kullanılması önerilir.
-            Entity closestEntity = Entity.Null;
-            float minDistance = float.MaxValue;
+            // PhysicsWorld üzerinden Raycast işlemi
+            if (!SystemAPI.TryGetSingleton<PhysicsWorldSingleton>(out var physicsWorld)) return;
 
-            Entities.ForEach((Entity entity, in LocalTransform transform, in ShipData ship) =>
+            RaycastInput rayInput = new RaycastInput
             {
-                // Basit küresel çarpışma kontrolü (Radius: 2.0)
-                float3 shipPos = transform.Position;
-                float distanceToRay = math.length(math.cross(ray.direction, (float3)ray.origin - shipPos));
+                Start = ray.origin,
+                End = (float3)ray.origin + (float3)ray.direction * 500f,
+                Filter = CollisionFilter.Default
+            };
 
-                if (distanceToRay < 2.0f)
+            var ecbSingleton = SystemAPI.GetSingleton<EndSimulationEntityCommandBufferSystem.Singleton>();
+            var ecb = ecbSingleton.CreateCommandBuffer(state.WorldUnmanaged);
+
+            // Önceki seçimleri temizle (ECB kullanarak)
+            foreach (var (tag, entity) in SystemAPI.Query<RefRO<SelectedTag>>().WithEntityAccess())
+            {
+                ecb.RemoveComponent<SelectedTag>(entity);
+            }
+
+            // Yeni seçimi physics world üzerinden yap
+            if (physicsWorld.CastRay(rayInput, out var hit))
+            {
+                Entity hitEntity = hit.Entity;
+                
+                // Eğer çarpılan entity bir gemi ise seç
+                if (state.EntityManager.HasComponent<ShipData>(hitEntity))
                 {
-                    float distToCam = math.distance(ray.origin, shipPos);
-                    if (distToCam < minDistance)
-                    {
-                        minDistance = distToCam;
-                        closestEntity = entity;
-                    }
+                    ecb.AddComponent<SelectedTag>(hitEntity);
+                    Debug.Log($"Ship Selected: {hitEntity}");
                 }
-            }).Run();
-
-            // Önceki seçimleri temizle
-            EntityManager.RemoveComponent<SelectedTag>(SystemAPI.QueryBuilder().WithAll<SelectedTag>().Build());
-
-            // Yeni seçimi işaretle
-            if (closestEntity != Entity.Null)
-            {
-                EntityManager.AddComponent<SelectedTag>(closestEntity);
-                Debug.Log($"Ship Selected: {closestEntity}");
             }
         }
     }

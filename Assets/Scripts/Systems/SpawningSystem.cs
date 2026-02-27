@@ -25,9 +25,10 @@ namespace GalacticNexus.Scripts.Systems
 
             // Bekleyen gemi sayısını kontrol et
             int waitingCount = 0;
-            var ships = _waitingShipsQuery.ToComponentDataArray<ShipData>(Unity.Collections.Allocator.Temp);
-            foreach(var s in ships) if(s.CurrentState == ShipState.Waiting) waitingCount++;
-            ships.Dispose();
+            foreach (var ship in SystemAPI.Query<RefRO<ShipData>>().WithAll<ShipTag>())
+            {
+                if (ship.ValueRO.CurrentState == ShipState.Waiting) waitingCount++;
+            }
 
             // Havuz limiti: 5 gemiden fazla bekleyen varsa spawning'i durdur
             if (waitingCount >= 5) return;
@@ -43,7 +44,9 @@ namespace GalacticNexus.Scripts.Systems
                     Entity newShip = ecb.Instantiate(spawner.ValueRO.ShipPrefab);
                     
                     // Rastgele veriler ata
-                    var rand = new Random(spawner.ValueRO.RandomSeed + (uint)state.WorldUnmanaged.EntityManager.GetEntityCount());
+                    // Zaman bazlı entropi ekleyerek her spawn'ın farklı olmasını sağla
+                    uint seed = spawner.ValueRO.RandomSeed + (uint)(SystemAPI.Time.ElapsedTime * 1000) + (uint)state.WorldUnmanaged.EntityManager.GetEntityCount();
+                    var rand = new Random(seed);
                     Fraction randomFraction = (Fraction)rand.NextInt(0, 3);
 
                     // Gemiyi başlangıç pozisyonuna yerleştir
