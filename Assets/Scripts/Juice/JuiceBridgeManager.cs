@@ -10,6 +10,7 @@ namespace GalacticNexus.Scripts.Juice
         public ParticleSystem DockedVFX;
         public ParticleSystem ServiceFinishedVFX;
         public GameObject FloatingTextPrefab;
+        public NarrativeUIController NarrativeUI;
         public AudioSource GlobalAudioSource;
         public AudioClip SellSound;
 
@@ -74,6 +75,32 @@ namespace GalacticNexus.Scripts.Juice
                     // Task F: Ready alert
                     if (e.Value == 1.0f)
                         SpawnFloatingText(e.Position, "READY", false); // Green pulse?
+                    break;
+
+                case GameEventType.StoryTrigger:
+                    if (NarrativeUI != null)
+                    {
+                        var eWorld = World.DefaultGameObjectInjectionWorld;
+                        float nexusProg = 0;
+                        double dm = 0;
+                        if (eWorld != null && eWorld.EntityManager.TryGetSingleton<GalacticNexus.Scripts.Components.EconomyData>(out var econ))
+                        {
+                            nexusProg = econ.NexusProgress;
+                            dm = econ.DarkMatter;
+                        }
+
+                        if (e.Value == 101f) // Welcome / Debt
+                        {
+                            NarrativeUI.ShowMessage("Sindicato Enforcer", "Hoş geldin evlat. Bu istasyon artık bizim korumamız altında... Yani haraç borcun var. Çalışmaya başla.", 101f);
+                        }
+                        else if (e.Value == 102f) // Mid-game Recognition
+                        {
+                            if (nexusProg > 0.5f || dm > 10)
+                                NarrativeUI.ShowMessage("Sindicato Enforcer", "İstasyonun parlıyor... Fazla parlıyor. Artık sadece borçlu bir operatör değilsin, bir tehditsin. Dikkatli ol.", 102f);
+                            else
+                                NarrativeUI.ShowMessage("The Core Officer", "Apex istasyonu canlanıyor. Verimlilik raporların etkileyici. Bize katılmaya ne dersin?", 102f);
+                        }
+                    }
                     break;
 
                 case GameEventType.Warning:

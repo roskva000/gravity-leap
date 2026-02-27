@@ -4,6 +4,11 @@ using Unity.Mathematics;
 namespace GalacticNexus.Scripts.Components
 {
     public struct ShipTag : IComponentData { }
+    
+    public struct TutorialArrow : IComponentData
+    {
+        public Entity TargetEntity;
+    }
 
     [UnityEngine.Rendering.MaterialProperty("_RustAmount")]
     public struct RustAmountOverride : IComponentData

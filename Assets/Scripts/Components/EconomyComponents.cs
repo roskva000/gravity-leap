@@ -11,6 +11,7 @@ namespace GalacticNexus.Scripts.Components
         public int PrestigeCount;
         public float NexusProgress;
         public bool NexusComplete;
+        public int TutorialStep;
     }
 
     public struct GlobalMarketData : IComponentData

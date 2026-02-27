@@ -16,6 +16,9 @@ namespace GalacticNexus.Scripts.Systems
         [BurstCompile]
         public void OnUpdate(ref SystemState state)
         {
+            if (!SystemAPI.TryGetSingleton<EconomyData>(out var economy)) return;
+            if (economy.TutorialStep < 3) return;
+
             float deltaTime = SystemAPI.Time.DeltaTime;
             timer += deltaTime;
 
