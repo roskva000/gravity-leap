@@ -91,6 +91,15 @@ namespace GalacticNexus.Scripts.Systems
                     if (rand.NextFloat() < 0.05f * deltaTime)
                     {
                         droneData.ValueRW.IsMalfunctioning = true;
+                        
+                        // Audio Event
+                        var malEvent = ecb.CreateEntity();
+                        ecb.AddComponent(malEvent, new GameEvent { 
+                            Type = Juice.GameEventType.DroneMalfunction, 
+                            Position = transform.ValueRO.Position, 
+                            Value = 2.0f 
+                        });
+
                         var arızaEvent = ecb.CreateEntity();
                         ecb.AddComponent(arızaEvent, new GameEvent { Type = Juice.GameEventType.Warning, Position = transform.ValueRO.Position, Value = 2.0f });
                         continue;

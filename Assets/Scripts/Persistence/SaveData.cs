@@ -17,6 +17,17 @@ namespace GalacticNexus.Scripts.Persistence
         public double DarkMatter;
         public int PrestigeCount;
 
+        // Progress & Tutorial
+        public int TutorialStep;
+        public float NexusProgress;
+        public bool NexusComplete;
+
+        // Combat & Marketplace
+        public float ShieldIntegrity;
+        public float SindicatoMultiplier;
+        public float TheCoreMultiplier;
+        public float VoidWalkersMultiplier;
+
         // Monetization
         public bool IsNoAdsPurchased;
         public float AdBoostRemainingSeconds;

@@ -13,6 +13,10 @@ namespace GalacticNexus.Scripts.Juice
         public NarrativeUIController NarrativeUI;
         public AudioSource GlobalAudioSource;
         public AudioClip SellSound;
+        public AudioClip StorySound;
+        public AudioClip WarningSound;
+        public AudioClip MalfunctionSound;
+        public AudioClip LegendaryGongSound;
 
         private UnityEngine.Pool.IObjectPool<GameObject> floatingTextPool;
 
@@ -89,6 +93,8 @@ namespace GalacticNexus.Scripts.Juice
                             dm = econ.DarkMatter;
                         }
 
+                        if (GlobalAudioSource && StorySound) GlobalAudioSource.PlayOneShot(StorySound);
+
                         if (e.Value == 101f) // Welcome / Debt
                         {
                             NarrativeUI.ShowMessage("Sindicato Enforcer", "Hoş geldin evlat. Bu istasyon artık bizim korumamız altında... Yani haraç borcun var. Çalışmaya başla.", 101f);
@@ -136,6 +142,17 @@ namespace GalacticNexus.Scripts.Juice
                         SpawnFloatingText(e.Position, "NEXUS BUFF APPLIED!", false);
                     else
                         SpawnFloatingText(e.Position, "WARNING", true);
+
+                    if (GlobalAudioSource && WarningSound) GlobalAudioSource.PlayOneShot(WarningSound);
+                    
+                    // Special sound for Legendary Ship (888f)
+                    if (e.Value == 888f && GlobalAudioSource && LegendaryGongSound)
+                        GlobalAudioSource.PlayOneShot(LegendaryGongSound);
+                    break;
+
+                case GameEventType.DroneMalfunction:
+                    if (GlobalAudioSource && MalfunctionSound) GlobalAudioSource.PlayOneShot(MalfunctionSound);
+                    SpawnFloatingText(e.Position, "MALFUNCTION!", true);
                     break;
             }
         }

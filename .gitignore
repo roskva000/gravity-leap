@@ -1,0 +1,41 @@
+/[Ll]ibrary/
+/[Tt]emp/
+/[Oo]bj/
+/[Bb]uild/
+/[Bb]uilds/
+/[Ll]ogs/
+/[Uu]serSettings/
+
+# Memory Captures
+/[Mm]emoryCaptures/
+
+# Recorded Videos
+/[Rr]ecordings/
+
+# Asset Import Settings (optional, recommended for larger teams)
+# /[Aa]ssets/Editor Default Resources/
+
+# Project files
+*.csproj
+*.unityproj
+*.sln
+*.suo
+*.tmp
+*.user
+*.userprefs
+*.pidb
+*.booproj
+*.svd
+*.pdb
+*.mdb
+*.opendb
+*.db
+.DS_Store
+[Tt]humbs.db
+sysinfo.txt
+*.apk
+*.aab
+*.unitypackage
+
+# User specified ignore
+/My project/

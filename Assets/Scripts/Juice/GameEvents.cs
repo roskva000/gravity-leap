@@ -10,7 +10,8 @@ namespace GalacticNexus.Scripts.Juice
         ScrapEarned,
         DroneBoost,
         Warning,
-        StoryTrigger
+        StoryTrigger,
+        DroneMalfunction
     }
 
     public struct GameEvent : IComponentData

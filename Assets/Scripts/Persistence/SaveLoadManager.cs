@@ -50,15 +50,25 @@ namespace GalacticNexus.Scripts.Persistence
                     adBoost = monData.AdBoostRemainingSeconds;
                 }
 
+                SystemAPI.TryGetSingleton<ShieldData>(out var shield);
+                SystemAPI.TryGetSingleton<GlobalMarketData>(out var market);
+
                 var data = new GameSaveData
                 {
                     ScrapCurrency = economy.ScrapCurrency,
                     TotalShipsServiced = economy.TotalShipsServiced,
                     DarkMatter = economy.DarkMatter,
                     PrestigeCount = economy.PrestigeCount,
+                    TutorialStep = economy.TutorialStep,
+                    NexusProgress = economy.NexusProgress,
+                    NexusComplete = economy.NexusComplete,
                     DockLevel = upgrade.DockLevel,
                     DroneSpeedLevel = upgrade.DroneSpeedLevel,
                     DroneBatteryLevel = upgrade.DroneBatteryLevel,
+                    ShieldIntegrity = shield.Integrity,
+                    SindicatoMultiplier = market.SindicatoMultiplier,
+                    TheCoreMultiplier = market.TheCoreMultiplier,
+                    VoidWalkersMultiplier = market.VoidWalkersMultiplier,
                     IsNoAdsPurchased = isNoAds,
                     AdBoostRemainingSeconds = adBoost,
                     LastSaveTimestamp = DateTime.UtcNow.Ticks
@@ -109,6 +119,9 @@ namespace GalacticNexus.Scripts.Persistence
                     economy.ValueRW.LastSaveTimestamp = data.LastSaveTimestamp;
                     economy.ValueRW.DarkMatter = data.DarkMatter;
                     economy.ValueRW.PrestigeCount = data.PrestigeCount;
+                    economy.ValueRW.TutorialStep = data.TutorialStep;
+                    economy.ValueRW.NexusProgress = data.NexusProgress;
+                    economy.ValueRW.NexusComplete = data.NexusComplete;
                 }
 
                 if (em.TryGetSingletonRW<UpgradeData>(out var upgrade))
@@ -116,6 +129,21 @@ namespace GalacticNexus.Scripts.Persistence
                     upgrade.ValueRW.DockLevel = data.DockLevel;
                     upgrade.ValueRW.DroneSpeedLevel = data.DroneSpeedLevel;
                     upgrade.ValueRW.DroneBatteryLevel = data.DroneBatteryLevel;
+                }
+
+                if (em.TryGetSingletonRW<ShieldData>(out var shield))
+                {
+                    shield.ValueRW.Integrity = data.ShieldIntegrity;
+                    shield.ValueRW.MaxIntegrity = 100f; 
+                    shield.ValueRW.IsActive = data.ShieldIntegrity > 0;
+                }
+
+                if (em.TryGetSingletonRW<GlobalMarketData>(out var market))
+                {
+                    market.ValueRW.SindicatoMultiplier = data.SindicatoMultiplier;
+                    market.ValueRW.TheCoreMultiplier = data.TheCoreMultiplier;
+                    market.ValueRW.VoidWalkersMultiplier = data.VoidWalkersMultiplier;
+                    if (market.ValueRO.SindicatoMultiplier == 0) market.ValueRW.SindicatoMultiplier = 1.0f;
                 }
 
                 if (em.TryGetSingletonRW<MonetizationData>(out var monData))

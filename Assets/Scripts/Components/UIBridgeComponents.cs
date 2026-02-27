@@ -1,5 +1,6 @@
 using Unity.Entities;
 using TMPro;
+using UnityEngine.Rendering;
 
 namespace GalacticNexus.Scripts.Components
 {
@@ -10,6 +11,7 @@ namespace GalacticNexus.Scripts.Components
         public TextMeshProUGUI GemsText;
         public TextMeshProUGUI ActiveShipsText;
         public UIJuiceController ScrapJuice;
+        public Volume PostProcessVolume;
         public double TargetScrap;
     }
 }
