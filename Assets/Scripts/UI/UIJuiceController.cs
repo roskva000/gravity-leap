@@ -1,88 +1,70 @@
 using UnityEngine;
 using TMPro;
-using Unity.Entities;
-using GalacticNexus.Scripts.Components;
 
 namespace GalacticNexus.Scripts.UI
 {
     public class UIJuiceController : MonoBehaviour
     {
-        [Header("Settings")]
-        [SerializeField] private float countSpeed = 5f;
-        [SerializeField] private float popScale = 1.2f;
-        [SerializeField] private float popDuration = 0.2f;
-        [SerializeField] private Color activeColor = new Color(1f, 0.5f, 0f); // Orange
-        [SerializeField] private Color normalColor = Color.white;
+        [Header("Juice Settings")]
+        [SerializeField] private float smoothTime = 0.15f;
+        [SerializeField] private float popScale = 1.25f;
+        [SerializeField] private float popDuration = 0.3f;
+        
+        [Header("Color Settings")]
+        [SerializeField, ColorUsage(true, true)] private Color glowColor = new Color(1f, 0.37f, 0f, 1f); // #FF5E00
+        [SerializeField] private Color baseColor = Color.white;
 
         private TextMeshProUGUI scrapText;
         private double displayedValue;
         private double targetValue;
+        private float currentVelocity; // For SmoothDamp
         
         private Vector3 originalScale;
         private float popTimer;
         private bool isPopping;
 
-        private void Start()
+        // Reference caching to avoid GC
+        private static readonly string PREFIX = "SCRAP: ";
+
+        private void Awake()
         {
             scrapText = GetComponent<TextMeshProUGUI>();
             originalScale = transform.localScale;
+        }
+
+        public void SetTargetValue(double newValue)
+        {
+            if (Mathf.Approximately((float)targetValue, (float)newValue)) return;
             
-            // Başlangıç değerini alabilmek için ECS World'e bak
-            UpdateValuesFromECS();
-            displayedValue = targetValue;
-            UpdateText();
+            if (newValue > targetValue)
+            {
+                StartPop();
+            }
+            
+            targetValue = newValue;
         }
 
         private void Update()
         {
-            UpdateValuesFromECS();
+            // Spring-like smooth movement for the number
+            double prevValue = displayedValue;
+            displayedValue = Mathf.SmoothDamp((float)displayedValue, (float)targetValue, ref currentVelocity, smoothTime);
 
-            if (displayedValue < targetValue)
+            // Update text only when the whole number changes to save performance
+            if (Mathf.FloorToInt((float)prevValue) != Mathf.FloorToInt((float)displayedValue))
             {
-                double prevValue = displayedValue;
-                displayedValue = Mathf.MoveTowards((float)displayedValue, (float)targetValue, (float)(targetValue - displayedValue) * countSpeed * Time.deltaTime + 1f);
-                
-                // Sadece tam sayı değiştiğinde metni güncelle
-                if (Mathf.FloorToInt((float)prevValue) != Mathf.FloorToInt((float)displayedValue))
-                {
-                    UpdateText();
-                }
-
-                if (!isPopping)
-                {
-                    StartPop();
-                }
-            }
-            else if (displayedValue > targetValue)
-            {
-                // Değer azaldığında (harcama) aniden düşebilir veya yavaşça azalabilir
-                displayedValue = targetValue;
                 UpdateText();
             }
 
             HandlePopAnimation();
         }
 
-        private void UpdateValuesFromECS()
-        {
-            var world = World.DefaultGameObjectInjectionWorld;
-            if (world == null) return;
-
-            var entityManager = world.EntityManager;
-            var query = entityManager.CreateEntityQuery(typeof(UIReferencesComponent));
-            
-            if (query.HasSingleton<UIReferencesComponent>())
-            {
-                var uiRefs = query.GetSingleton<UIReferencesComponent>();
-                targetValue = uiRefs.TargetScrap;
-            }
-        }
-
         private void UpdateText()
         {
             if (scrapText != null)
             {
-                scrapText.text = $"SCRAP: {displayedValue:F0}";
+                // SetText is optimized in TMP to minimize garbage
+                scrapText.SetText("{0}{1:F0}", PREFIX, displayedValue);
             }
         }
 
@@ -90,26 +72,32 @@ namespace GalacticNexus.Scripts.UI
         {
             isPopping = true;
             popTimer = popDuration;
-            if (scrapText != null) scrapText.color = activeColor;
         }
 
         private void HandlePopAnimation()
         {
-            if (isPopping)
-            {
-                popTimer -= Time.deltaTime;
-                float progress = 1f - (popTimer / popDuration);
-                
-                // Basit bir sinüs dalgası ile pop etkisi
-                float scaleEffect = Mathf.Sin(progress * Mathf.PI);
-                transform.localScale = originalScale * (1f + (popScale - 1f) * scaleEffect);
+            if (!isPopping) return;
 
-                if (popTimer <= 0)
-                {
-                    isPopping = false;
-                    transform.localScale = originalScale;
-                    if (scrapText != null) scrapText.color = normalColor;
-                }
+            popTimer -= Time.deltaTime;
+            float progress = 1f - (popTimer / popDuration);
+            
+            // Fast out, slow in curve for the "Pop"
+            float curve = Mathf.Sin(progress * Mathf.PI);
+            
+            // Scale animation
+            transform.localScale = originalScale * (1f + (popScale - 1f) * curve);
+
+            // Color / Glow animation
+            if (scrapText != null)
+            {
+                scrapText.color = Color.Lerp(baseColor, glowColor, curve);
+            }
+
+            if (popTimer <= 0)
+            {
+                isPopping = false;
+                transform.localScale = originalScale;
+                if (scrapText != null) scrapText.color = baseColor;
             }
         }
     }

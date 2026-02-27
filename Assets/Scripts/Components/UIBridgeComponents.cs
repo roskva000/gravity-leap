@@ -9,6 +9,7 @@ namespace GalacticNexus.Scripts.Components
         public TextMeshProUGUI ScrapText;
         public TextMeshProUGUI GemsText;
         public TextMeshProUGUI ActiveShipsText;
+        public UIJuiceController ScrapJuice;
         public double TargetScrap;
     }
 }
