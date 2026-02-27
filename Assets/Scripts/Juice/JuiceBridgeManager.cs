@@ -86,6 +86,12 @@ namespace GalacticNexus.Scripts.Juice
                     // Task I: Overclock Malfunction
                     else if (e.Value == 2.0f)
                         SpawnFloatingText(e.Position, "MALFUNCTION!", true);
+                    // Task J: Market Update
+                    else if (e.Value == 777f)
+                        SpawnFloatingText(e.Position, "MARKET UPDATED", false);
+                    // Task L: Field Repair
+                    else if (e.Value == 999f)
+                        SpawnFloatingText(e.Position, "REPAIRED", false);
                     else
                         SpawnFloatingText(e.Position, "WARNING", true);
                     break;

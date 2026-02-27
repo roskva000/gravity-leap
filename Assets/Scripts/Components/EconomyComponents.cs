@@ -11,6 +11,13 @@ namespace GalacticNexus.Scripts.Components
         public int PrestigeCount;
     }
 
+    public struct GlobalMarketData : IComponentData
+    {
+        public float SindicatoMultiplier;
+        public float TheCoreMultiplier;
+        public float VoidWalkersMultiplier;
+    }
+
     public struct RewardData : IComponentData
     {
         public float BaseReward;

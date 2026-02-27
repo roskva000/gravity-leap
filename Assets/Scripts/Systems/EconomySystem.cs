@@ -13,8 +13,9 @@ namespace GalacticNexus.Scripts.Systems
         [BurstCompile]
         public void OnUpdate(ref SystemState state)
         {
-            // Tekil ekonomi verisini (Singleton) bul
+            // Tekil ekonomi ve pazar verilerini bul
             if (!SystemAPI.TryGetSingletonRW<EconomyData>(out var economy)) return;
+            if (!SystemAPI.TryGetSingletonRO<GlobalMarketData>(out var market)) return;
 
             var ecbSingleton = SystemAPI.GetSingleton<EndSimulationEntityCommandBufferSystem.Singleton>();
             var ecb = ecbSingleton.CreateCommandBuffer(state.WorldUnmanaged);
@@ -24,9 +25,17 @@ namespace GalacticNexus.Scripts.Systems
             {
                 if (ship.ValueRO.CurrentState == ShipState.Taxes)
                 {
+                    float marketMultiplier = 1.0f;
+                    switch (ship.ValueRO.OwnerFraction)
+                    {
+                        case Fraction.Sindicato: marketMultiplier = market.SindicatoMultiplier; break;
+                        case Fraction.TheCore: marketMultiplier = market.TheCoreMultiplier; break;
+                        case Fraction.VoidWalkers: marketMultiplier = market.VoidWalkersMultiplier; break;
+                    }
+
                     // Geliri hesaba ekle (Prestij Çarpanı Dahil)
                     double prestigeMultiplier = 1.0 + (economy.ValueRO.DarkMatter * 0.10);
-                    double finalReward = reward.ValueRO.BaseReward * reward.ValueRO.FractionMultiplier * prestigeMultiplier;
+                    double finalReward = reward.ValueRO.BaseReward * reward.ValueRO.FractionMultiplier * prestigeMultiplier * marketMultiplier;
                     
                     // Task C: Critical condition gives 300% more reward
                     if (ship.ValueRO.Condition == ShipCondition.Critical)

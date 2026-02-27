@@ -51,12 +51,38 @@ namespace GalacticNexus.Scripts.Systems
                     Debug.Log($"Ship Selected: {hitEntity}");
                 }
                 
-                // Task I: Drone Overclock Toggle
+                // Task I & L: Drone Interaction
                 if (state.EntityManager.TryGetComponent<DroneData>(hitEntity, out var droneData))
                 {
-                    droneData.IsOverclocked = !droneData.IsOverclocked;
-                    ecb.SetComponent(hitEntity, droneData);
-                    Debug.Log($"Drone Overclocked: {droneData.IsOverclocked}");
+                    if (droneData.IsMalfunctioning)
+                    {
+                        if (SystemAPI.TryGetSingletonRW<EconomyData>(out var economy))
+                        {
+                            float repairCost = 50f;
+                            if (economy.ValueRO.ScrapCurrency >= repairCost)
+                            {
+                                economy.ValueRW.ScrapCurrency -= repairCost;
+                                droneData.IsMalfunctioning = false;
+                                droneData.BatteryLevel = 0.5f; // Give some battery after repair
+                                ecb.SetComponent(hitEntity, droneData);
+                                
+                                var repairEvent = ecb.CreateEntity();
+                                ecb.AddComponent(repairEvent, new GameEvent
+                                {
+                                    Type = GameEventType.Warning, // Using Warning group for FloatingText in bridge
+                                    Position = hit.Position,
+                                    Value = 999f // Magic number for REPAIRED
+                                });
+                                Debug.Log("Drone Repaired in Field!");
+                            }
+                        }
+                    }
+                    else
+                    {
+                        droneData.IsOverclocked = !droneData.IsOverclocked;
+                        ecb.SetComponent(hitEntity, droneData);
+                        Debug.Log($"Drone Overclocked: {droneData.IsOverclocked}");
+                    }
                 }
             }
         }

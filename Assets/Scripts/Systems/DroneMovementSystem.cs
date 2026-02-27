@@ -26,7 +26,8 @@ namespace GalacticNexus.Scripts.Systems
                 float consumptionMultiplier = 1.0f;
                 if (droneData.ValueRO.IsOverclocked)
                 {
-                    consumptionMultiplier = 4.0f; 
+                    // Task L: Overclock Efficiency Scaling
+                    consumptionMultiplier = math.max(1.5f, 4.0f - upgrade.DroneBatteryLevel * 0.25f); 
                     
                     var rand = new Unity.Mathematics.Random((uint)(SystemAPI.Time.ElapsedTime * 1000) + 1);
                     if (rand.NextFloat() < 0.05f * deltaTime)

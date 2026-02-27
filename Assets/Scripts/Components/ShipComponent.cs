@@ -29,6 +29,18 @@ namespace GalacticNexus.Scripts.Components
         public float Value;
     }
 
+    [UnityEngine.Rendering.MaterialProperty("_GlitchIntensity")]
+    public struct HologramGlitchOverride : IComponentData
+    {
+        public float Value;
+    }
+
+    [UnityEngine.Rendering.MaterialProperty("_RGBSplit")]
+    public struct HologramSplitOverride : IComponentData
+    {
+        public float Value;
+    }
+
     public struct ShipData : IComponentData
     {
         public float Health;

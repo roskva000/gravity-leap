@@ -38,9 +38,13 @@ namespace GalacticNexus.Scripts.Systems
                 dmBoost += (float)(economy.DarkMatter / 100.0) * 0.05f;
             }
 
-            foreach (var (shipData, rust, neon, neonColor, pulse, transform, entity) in 
-                SystemAPI.Query<RefRW<ShipData>, RefRW<RustAmountOverride>, RefRW<NeonPowerOverride>, RefRW<NeonColorOverride>, RefRW<PulseSpeedOverride>, RefRW<LocalTransform>>().WithEntityAccess())
+            foreach (var (shipData, rust, neon, neonColor, pulse, glitch, split, transform, entity) in 
+                SystemAPI.Query<RefRW<ShipData>, RefRW<RustAmountOverride>, RefRW<NeonPowerOverride>, RefRW<NeonColorOverride>, RefRW<PulseSpeedOverride>, RefRW<HologramGlitchOverride>, RefRW<HologramSplitOverride>, RefRW<LocalTransform>>().WithEntityAccess())
             {
+                // Task K: Hologram Diagnostics
+                glitch.ValueRW.Value = math.saturate(1.0f - shipData.ValueRO.HullIntegrity);
+                split.ValueRW.Value = math.saturate(1.0f - shipData.ValueRO.RepairProgress);
+
                 // Task G: Faction Colors
                 switch (shipData.ValueRO.OwnerFraction)
                 {
