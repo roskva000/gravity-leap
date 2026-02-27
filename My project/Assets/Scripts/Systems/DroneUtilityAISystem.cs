@@ -1,8 +1,10 @@
 using Unity.Burst;
+using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
 using GalacticNexus.Scripts.Components;
+using GalacticNexus.Scripts.Juice;
 
 namespace GalacticNexus.Scripts.Systems
 {
@@ -30,7 +32,7 @@ namespace GalacticNexus.Scripts.Systems
             var shipsEntities = new NativeArray<Entity>(shipCount, Allocator.TempJob);
 
             int index = 0;
-            foreach (var (shipData, shipTransform, shipEntity) in SystemAPI.Query<RefRO<ShipData>, RefRO<LocalTransform>, Entity>().WithAll<ShipTag>())
+            foreach (var (shipData, shipTransform, shipEntity) in SystemAPI.Query<RefRO<ShipData>, RefRO<LocalTransform>>().WithAll<ShipTag>().WithEntityAccess())
             {
                 if (shipData.ValueRO.CurrentState == ShipState.Docked)
                 {

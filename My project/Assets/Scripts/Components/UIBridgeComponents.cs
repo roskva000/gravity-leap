@@ -1,6 +1,7 @@
 using Unity.Entities;
 using TMPro;
 using UnityEngine.Rendering;
+using GalacticNexus.Scripts.UI;
 
 namespace GalacticNexus.Scripts.Components
 {

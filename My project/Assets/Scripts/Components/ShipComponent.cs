@@ -1,5 +1,6 @@
 using Unity.Entities;
 using Unity.Mathematics;
+using Unity.Rendering;
 
 namespace GalacticNexus.Scripts.Components
 {
@@ -10,37 +11,37 @@ namespace GalacticNexus.Scripts.Components
         public Entity TargetEntity;
     }
 
-    [UnityEngine.Rendering.MaterialProperty("_RustAmount")]
+    [MaterialProperty("_RustAmount")]
     public struct RustAmountOverride : IComponentData
     {
         public float Value;
     }
 
-    [UnityEngine.Rendering.MaterialProperty("_NeonPower")]
+    [MaterialProperty("_NeonPower")]
     public struct NeonPowerOverride : IComponentData
     {
         public float Value;
     }
 
-    [UnityEngine.Rendering.MaterialProperty("_NeonColor")]
+    [MaterialProperty("_NeonColor")]
     public struct NeonColorOverride : IComponentData
     {
         public float4 Value;
     }
 
-    [UnityEngine.Rendering.MaterialProperty("_PulseSpeed")]
+    [MaterialProperty("_PulseSpeed")]
     public struct PulseSpeedOverride : IComponentData
     {
         public float Value;
     }
 
-    [UnityEngine.Rendering.MaterialProperty("_GlitchIntensity")]
+    [MaterialProperty("_GlitchIntensity")]
     public struct HologramGlitchOverride : IComponentData
     {
         public float Value;
     }
 
-    [UnityEngine.Rendering.MaterialProperty("_RGBSplit")]
+    [MaterialProperty("_RGBSplit")]
     public struct HologramSplitOverride : IComponentData
     {
         public float Value;

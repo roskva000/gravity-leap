@@ -13,11 +13,10 @@ namespace GalacticNexus.Scripts.Systems
         public void OnUpdate(ref SystemState state)
         {
             // 1. Boş Dock'ları topla
-            var docksQuery = SystemAPI.Query<RefRW<DockData>, LocalTransform>();
             var availableDocks = new NativeList<Entity>(Allocator.Temp);
             var dockTransforms = new NativeList<LocalTransform>(Allocator.Temp);
 
-            foreach (var (dock, transform, entity) in docksQuery.WithEntityAccess())
+            foreach (var (dock, transform, entity) in SystemAPI.Query<RefRW<DockData>, LocalTransform>().WithEntityAccess())
             {
                 if (!dock.ValueRO.IsOccupied)
                 {

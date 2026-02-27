@@ -4,6 +4,8 @@ using Unity.Mathematics;
 using UnityEngine;
 using GalacticNexus.Scripts.Components;
 using Unity.Physics;
+using GalacticNexus.Scripts.Juice;
+using UnityEngine.InputSystem;
 
 namespace GalacticNexus.Scripts.Systems
 {
@@ -13,12 +15,13 @@ namespace GalacticNexus.Scripts.Systems
         public void OnUpdate(ref SystemState state)
         {
             // Sol tık veya dokunma kontrolü
-            if (!Input.GetMouseButtonDown(0)) return;
+            var mouse = UnityEngine.InputSystem.Mouse.current;
+            if (mouse == null || !mouse.leftButton.wasPressedThisFrame) return;
 
             if (Camera.main == null) return;
 
             // Kamera üzerinden Raycast
-            UnityEngine.Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+            UnityEngine.Ray ray = Camera.main.ScreenPointToRay(mouse.position.ReadValue());
             
             // PhysicsWorld üzerinden Raycast işlemi
             if (!SystemAPI.TryGetSingleton<PhysicsWorldSingleton>(out var physicsWorld)) return;
@@ -51,9 +54,9 @@ namespace GalacticNexus.Scripts.Systems
                     Debug.Log($"Ship Selected: {hitEntity}");
                 }
                 
-                // Task I & L: Drone Interaction
-                if (state.EntityManager.TryGetComponent<DroneData>(hitEntity, out var droneData))
+                if (state.EntityManager.HasComponent<DroneData>(hitEntity))
                 {
+                    var droneData = state.EntityManager.GetComponentData<DroneData>(hitEntity);
                     if (droneData.IsMalfunctioning)
                     {
                         if (SystemAPI.TryGetSingletonRW<EconomyData>(out var economy))

@@ -1,3 +1,4 @@
+using Unity.Burst;
 using Unity.Entities;
 using GalacticNexus.Scripts.Components;
 using GalacticNexus.Scripts.Persistence;
@@ -28,7 +29,7 @@ namespace GalacticNexus.Scripts.Systems
             _isProcessed = true;
         }
 
-        [BurstCompile]
+        // Not [BurstCompile] — DateTime is managed code, not Burst-compatible
         private void CalculateOfflineEarnings(ref SystemState state, long currentTicks)
         {
             // Singleton'ları kontrol et
@@ -72,8 +73,8 @@ namespace GalacticNexus.Scripts.Systems
 
                 // 3. Final Hesaplama
                 double avgRewardPerMin = 10.0; 
-                double efficiency = 1.0 + upgrade.ValueRO.DroneSpeedLevel * 0.1;
-                double baseOfflineEarnings = totalMinutes * (upgrade.ValueRO.DockLevel * avgRewardPerMin * efficiency);
+                double efficiency = 1.0 + upgrade.DroneSpeedLevel * 0.1;
+                double baseOfflineEarnings = totalMinutes * (upgrade.DockLevel * avgRewardPerMin * efficiency);
                 
                 double finalOfflineEarnings = baseOfflineEarnings * prestigeMultiplier * adMultiplier;
 

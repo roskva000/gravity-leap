@@ -1,6 +1,7 @@
 using UnityEngine;
 using Unity.Entities;
 using GalacticNexus.Scripts.Juice;
+using GalacticNexus.Scripts.Narrative;
 using TMPro;
 
 namespace GalacticNexus.Scripts.Juice
@@ -40,11 +41,20 @@ namespace GalacticNexus.Scripts.Juice
 
             var ecb = new EntityCommandBuffer(Unity.Collections.Allocator.Temp);
 
-            // ECS'den gelen olayları işle
-            foreach (var (eventData, entity) in world.EntityManager.Query<GameEvent>().WithEntityAccess())
+            var query = world.EntityManager.CreateEntityQuery(typeof(GameEvent));
+            if (!query.IsEmptyIgnoreFilter)
             {
-                ProcessEvent(eventData);
-                ecb.DestroyEntity(entity); // Olayı tüket
+                var events = query.ToComponentDataArray<GameEvent>(Unity.Collections.Allocator.Temp);
+                var entities = query.ToEntityArray(Unity.Collections.Allocator.Temp);
+
+                for (int i = 0; i < events.Length; i++)
+                {
+                    ProcessEvent(events[i]);
+                    ecb.DestroyEntity(entities[i]); // Olayı tüket
+                }
+                
+                events.Dispose();
+                entities.Dispose();
             }
 
             ecb.Playback(world.EntityManager);
@@ -64,13 +74,20 @@ namespace GalacticNexus.Scripts.Juice
                     if (GlobalAudioSource && SellSound) GlobalAudioSource.PlayOneShot(SellSound);
                     
                     // Task C: Scale UI Pop
-                    var worldRef = World.DefaultGameObjectInjectionWorld;
-                    if (worldRef != null)
+                    var w = World.DefaultGameObjectInjectionWorld;
+                    if (w != null)
                     {
-                        foreach (var uiRefs in worldRef.EntityManager.Query<GalacticNexus.Scripts.Components.UIReferencesComponent>())
+                        var uiQuery = w.EntityManager.CreateEntityQuery(typeof(GalacticNexus.Scripts.Components.UIReferencesComponent));
+                        if (!uiQuery.IsEmptyIgnoreFilter)
                         {
-                            if (uiRefs.ScrapJuice != null)
-                                uiRefs.ScrapJuice.SetTargetValue(e.Value, e.Scale); // Pass magnitude
+                            var uiEntities = uiQuery.ToEntityArray(Unity.Collections.Allocator.Temp);
+                            foreach (var uiEntity in uiEntities)
+                            {
+                                var uiRefs = w.EntityManager.GetComponentData<GalacticNexus.Scripts.Components.UIReferencesComponent>(uiEntity);
+                                if (uiRefs.ScrapJuice != null)
+                                    uiRefs.ScrapJuice.SetTargetValue(e.Value); // Pass magnitude
+                            }
+                            uiEntities.Dispose();
                         }
                     }
                     break;
@@ -87,10 +104,15 @@ namespace GalacticNexus.Scripts.Juice
                         var eWorld = World.DefaultGameObjectInjectionWorld;
                         float nexusProg = 0;
                         double dm = 0;
-                        if (eWorld != null && eWorld.EntityManager.TryGetSingleton<GalacticNexus.Scripts.Components.EconomyData>(out var econ))
+                        if (eWorld != null)
                         {
-                            nexusProg = econ.NexusProgress;
-                            dm = econ.DarkMatter;
+                            var qEco = eWorld.EntityManager.CreateEntityQuery(typeof(GalacticNexus.Scripts.Components.EconomyData));
+                            if (!qEco.IsEmptyIgnoreFilter)
+                            {
+                                var econ = qEco.GetSingleton<GalacticNexus.Scripts.Components.EconomyData>();
+                                nexusProg = econ.NexusProgress;
+                                dm = econ.DarkMatter;
+                            }
                         }
 
                         if (GlobalAudioSource && StorySound) GlobalAudioSource.PlayOneShot(StorySound);

@@ -1,5 +1,7 @@
 using Unity.Burst;
 using Unity.Entities;
+using Unity.Mathematics;
+using Unity.Transforms;
 using GalacticNexus.Scripts.Components;
 
 namespace GalacticNexus.Scripts.Systems
@@ -17,7 +19,7 @@ namespace GalacticNexus.Scripts.Systems
             var ecb = ecbSingleton.CreateCommandBuffer(state.WorldUnmanaged);
 
             // Gelen yükseltme isteklerini işle
-            foreach (var (request, entity) in SystemAPI.Query<UpgradeRequest, Entity>())
+            foreach (var (request, entity) in SystemAPI.Query<UpgradeRequest>().WithEntityAccess())
             {
                 double cost = math.floor(CalculateCost(request.Type, upgrade.ValueRO));
 

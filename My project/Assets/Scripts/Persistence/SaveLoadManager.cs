@@ -39,19 +39,28 @@ namespace GalacticNexus.Scripts.Persistence
                 
                 var em = world.EntityManager;
 
-                if (!em.TryGetSingleton<EconomyData>(out var economy)) return;
-                if (!em.TryGetSingleton<UpgradeData>(out var upgrade)) return;
-                
+                var qEco = em.CreateEntityQuery(typeof(EconomyData));
+                var qUpg = em.CreateEntityQuery(typeof(UpgradeData));
+                var qMon = em.CreateEntityQuery(typeof(MonetizationData));
+                var qShield = em.CreateEntityQuery(typeof(ShieldData));
+                var qMarket = em.CreateEntityQuery(typeof(GlobalMarketData));
+
+                if (qEco.IsEmptyIgnoreFilter || qUpg.IsEmptyIgnoreFilter) return;
+
+                var economy = qEco.GetSingleton<EconomyData>();
+                var upgrade = qUpg.GetSingleton<UpgradeData>();
+
                 bool isNoAds = false;
                 float adBoost = 0f;
-                if (em.TryGetSingleton<MonetizationData>(out var monData))
+                if (!qMon.IsEmptyIgnoreFilter)
                 {
+                    var monData = qMon.GetSingleton<MonetizationData>();
                     isNoAds = monData.IsNoAdsPurchased;
                     adBoost = monData.AdBoostRemainingSeconds;
                 }
 
-                SystemAPI.TryGetSingleton<ShieldData>(out var shield);
-                SystemAPI.TryGetSingleton<GlobalMarketData>(out var market);
+                var shield = qShield.IsEmptyIgnoreFilter ? new ShieldData() : qShield.GetSingleton<ShieldData>();
+                var market = qMarket.IsEmptyIgnoreFilter ? new GlobalMarketData() : qMarket.GetSingleton<GlobalMarketData>();
 
                 var data = new GameSaveData
                 {
@@ -112,46 +121,61 @@ namespace GalacticNexus.Scripts.Persistence
 
                 var em = World.DefaultGameObjectInjectionWorld.EntityManager;
                 
-                if (em.TryGetSingletonRW<EconomyData>(out var economy))
+                var query = em.CreateEntityQuery(typeof(EconomyData));
+                if (!query.IsEmptyIgnoreFilter)
                 {
-                    economy.ValueRW.ScrapCurrency = data.ScrapCurrency;
-                    economy.ValueRW.TotalShipsServiced = data.TotalShipsServiced;
-                    economy.ValueRW.LastSaveTimestamp = data.LastSaveTimestamp;
-                    economy.ValueRW.DarkMatter = data.DarkMatter;
-                    economy.ValueRW.PrestigeCount = data.PrestigeCount;
-                    economy.ValueRW.TutorialStep = data.TutorialStep;
-                    economy.ValueRW.NexusProgress = data.NexusProgress;
-                    economy.ValueRW.NexusComplete = data.NexusComplete;
+                    var economy = query.GetSingleton<EconomyData>();
+                    economy.ScrapCurrency = data.ScrapCurrency;
+                    economy.TotalShipsServiced = data.TotalShipsServiced;
+                    economy.LastSaveTimestamp = data.LastSaveTimestamp;
+                    economy.DarkMatter = data.DarkMatter;
+                    economy.PrestigeCount = data.PrestigeCount;
+                    economy.TutorialStep = data.TutorialStep;
+                    economy.NexusProgress = data.NexusProgress;
+                    economy.NexusComplete = data.NexusComplete;
+                    query.SetSingleton(economy);
                 }
 
-                if (em.TryGetSingletonRW<UpgradeData>(out var upgrade))
+                var qUpgrade = em.CreateEntityQuery(typeof(UpgradeData));
+                if (!qUpgrade.IsEmptyIgnoreFilter)
                 {
-                    upgrade.ValueRW.DockLevel = data.DockLevel;
-                    upgrade.ValueRW.DroneSpeedLevel = data.DroneSpeedLevel;
-                    upgrade.ValueRW.DroneBatteryLevel = data.DroneBatteryLevel;
+                    var upgrade = qUpgrade.GetSingleton<UpgradeData>();
+                    upgrade.DockLevel = data.DockLevel;
+                    upgrade.DroneSpeedLevel = data.DroneSpeedLevel;
+                    upgrade.DroneBatteryLevel = data.DroneBatteryLevel;
+                    qUpgrade.SetSingleton(upgrade);
                 }
 
-                if (em.TryGetSingletonRW<ShieldData>(out var shield))
+                var qShield = em.CreateEntityQuery(typeof(ShieldData));
+                if (!qShield.IsEmptyIgnoreFilter)
                 {
-                    shield.ValueRW.Integrity = data.ShieldIntegrity;
-                    shield.ValueRW.MaxIntegrity = 100f; 
-                    shield.ValueRW.IsActive = data.ShieldIntegrity > 0;
+                    var shield = qShield.GetSingleton<ShieldData>();
+                    shield.Integrity = data.ShieldIntegrity;
+                    shield.MaxIntegrity = 100f; 
+                    shield.IsActive = data.ShieldIntegrity > 0;
+                    qShield.SetSingleton(shield);
                 }
 
-                if (em.TryGetSingletonRW<GlobalMarketData>(out var market))
+                var qMarket = em.CreateEntityQuery(typeof(GlobalMarketData));
+                if (!qMarket.IsEmptyIgnoreFilter)
                 {
-                    market.ValueRW.SindicatoMultiplier = data.SindicatoMultiplier;
-                    market.ValueRW.TheCoreMultiplier = data.TheCoreMultiplier;
-                    market.ValueRW.VoidWalkersMultiplier = data.VoidWalkersMultiplier;
-                    if (market.ValueRO.SindicatoMultiplier == 0) market.ValueRW.SindicatoMultiplier = 1.0f;
+                    var market = qMarket.GetSingleton<GlobalMarketData>();
+                    market.SindicatoMultiplier = data.SindicatoMultiplier;
+                    market.TheCoreMultiplier = data.TheCoreMultiplier;
+                    market.VoidWalkersMultiplier = data.VoidWalkersMultiplier;
+                    if (market.SindicatoMultiplier == 0) market.SindicatoMultiplier = 1.0f;
+                    qMarket.SetSingleton(market);
                 }
 
-                if (em.TryGetSingletonRW<MonetizationData>(out var monData))
+                var qMon = em.CreateEntityQuery(typeof(MonetizationData));
+                if (!qMon.IsEmptyIgnoreFilter)
                 {
-                    monData.ValueRW.IsNoAdsPurchased = data.IsNoAdsPurchased;
-                    monData.ValueRW.AdBoostRemainingSeconds = data.AdBoostRemainingSeconds;
+                    var monData = qMon.GetSingleton<MonetizationData>();
+                    monData.IsNoAdsPurchased = data.IsNoAdsPurchased;
+                    monData.AdBoostRemainingSeconds = data.AdBoostRemainingSeconds;
                     // Reset multiplier if loaded with 0 boost
-                    if (data.AdBoostRemainingSeconds <= 0) monData.ValueRW.LastAdMultiplier = 1.0f;
+                    if (data.AdBoostRemainingSeconds <= 0) monData.LastAdMultiplier = 1.0f;
+                    qMon.SetSingleton(monData);
                 }
 
                 Debug.Log($"Game Loaded Successfully from {SavePath}");

@@ -81,8 +81,7 @@ namespace GalacticNexus.Scripts.UI
         {
             if (scrapText != null)
             {
-                // SetText is optimized in TMP to minimize garbage
-                scrapText.SetText("{0}{1:F0}", PREFIX, displayedValue);
+                scrapText.text = $"{PREFIX}{displayedValue:F0}";
             }
         }
 

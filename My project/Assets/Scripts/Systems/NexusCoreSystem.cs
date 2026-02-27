@@ -3,6 +3,7 @@ using Unity.Entities;
 using Unity.Mathematics;
 using GalacticNexus.Scripts.Components;
 using Unity.Transforms;
+using GalacticNexus.Scripts.Juice;
 
 namespace GalacticNexus.Scripts.Systems
 {

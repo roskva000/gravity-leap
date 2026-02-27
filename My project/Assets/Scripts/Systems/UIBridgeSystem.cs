@@ -47,7 +47,7 @@ namespace GalacticNexus.Scripts.Systems
                         bool isVIP = false;
                         foreach (var ship in SystemAPI.Query<RefRO<ShipData>>())
                         {
-                            if (ship.ValueRO.OwnerFraction == FractionType.VoidWalkers) 
+                            if (ship.ValueRO.OwnerFraction == Fraction.VoidWalkers) 
                             {
                                 isVIP = true;
                                 break;

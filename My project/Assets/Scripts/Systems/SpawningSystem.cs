@@ -4,6 +4,7 @@ using Unity.Transforms;
 using Unity.Mathematics;
 using GalacticNexus.Scripts.Components;
 using Unity.Collections;
+using GalacticNexus.Scripts.Juice;
 
 namespace GalacticNexus.Scripts.Systems
 {
@@ -51,7 +52,7 @@ namespace GalacticNexus.Scripts.Systems
                     
                     // Rastgele veriler ata
                     // Zaman bazlı entropi ekleyerek her spawn'ın farklı olmasını sağla
-                    uint seed = spawner.ValueRO.RandomSeed + (uint)(SystemAPI.Time.ElapsedTime * 1000) + (uint)state.WorldUnmanaged.EntityManager.GetEntityCount();
+                    uint seed = spawner.ValueRO.RandomSeed + (uint)(SystemAPI.Time.ElapsedTime * 1000) + (uint)_waitingShipsQuery.CalculateEntityCount();
                     var rand = new Random(seed);
                     Fraction randomFraction = (Fraction)rand.NextInt(0, 3);
 

@@ -60,7 +60,8 @@ namespace GalacticNexus.Scripts.Narrative
 
         private void Update()
         {
-            if (isWaitingForClick && Input.GetMouseButtonDown(0))
+            var mouse = UnityEngine.InputSystem.Mouse.current;
+            if (isWaitingForClick && mouse != null && mouse.leftButton.wasPressedThisFrame)
             {
                 isWaitingForClick = false;
                 WindowRoot.SetActive(false);

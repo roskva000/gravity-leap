@@ -16,10 +16,12 @@ namespace GalacticNexus.Scripts.Persistence
 
         public void TryPerformPrestige()
         {
-            if (!_em.TryGetSingletonRW<EconomyData>(out var economy)) return;
+            var qEco = _em.CreateEntityQuery(typeof(EconomyData));
+            if (qEco.IsEmptyIgnoreFilter) return;
+            var economy = qEco.GetSingleton<EconomyData>();
 
             // Formül: floor(sqrt(TotalShips / 500))
-            double earnedDarkMatter = math.floor(math.sqrt(economy.ValueRO.TotalShipsServiced / 500.0));
+            double earnedDarkMatter = math.floor(math.sqrt(economy.TotalShipsServiced / 500.0));
 
             if (earnedDarkMatter > 0)
             {
@@ -33,26 +35,33 @@ namespace GalacticNexus.Scripts.Persistence
 
         private void PerformPrestige(double darkMatterGain)
         {
-            if (!_em.TryGetSingletonRW<EconomyData>(out var economy)) return;
-            if (!_em.TryGetSingletonRW<UpgradeData>(out var upgrade)) return;
+            var qEco = _em.CreateEntityQuery(typeof(EconomyData));
+            var qUpg = _em.CreateEntityQuery(typeof(UpgradeData));
+            if (qEco.IsEmptyIgnoreFilter || qUpg.IsEmptyIgnoreFilter) return;
+
+            var economy = qEco.GetSingleton<EconomyData>();
+            var upgrade = qUpg.GetSingleton<UpgradeData>();
 
             // 1. Kalıcı verileri güncelle
-            economy.ValueRW.DarkMatter += darkMatterGain;
-            economy.ValueRW.PrestigeCount++;
+            economy.DarkMatter += darkMatterGain;
+            economy.PrestigeCount++;
 
             // 2. Sıradan verileri sıfırla
-            economy.ValueRW.ScrapCurrency = 0;
-            economy.ValueRW.TotalShipsServiced = 0;
+            economy.ScrapCurrency = 0;
+            economy.TotalShipsServiced = 0;
 
             // 3. Yükseltmeleri sıfırla
-            upgrade.ValueRW.DockLevel = 1;
-            upgrade.ValueRW.DroneSpeedLevel = 1;
-            upgrade.ValueRW.DroneBatteryLevel = 1;
+            upgrade.DockLevel = 1;
+            upgrade.DroneSpeedLevel = 1;
+            upgrade.DroneBatteryLevel = 1;
+
+            qEco.SetSingleton(economy);
+            qUpg.SetSingleton(upgrade);
 
             // 4. ECS Dünyasını Resetle (Gemi ve Drone'ları temizle)
             ClearAllShipsAndDrones();
 
-            Debug.Log($"PRESTIGE COMPLETE! Gained {darkMatterGain} Dark Matter. Total DM: {economy.ValueRO.DarkMatter}");
+            Debug.Log($"PRESTIGE COMPLETE! Gained {darkMatterGain} Dark Matter. Total DM: {economy.DarkMatter}");
             
             // Kaydet
             GetComponent<SaveLoadManager>()?.RequestSave();

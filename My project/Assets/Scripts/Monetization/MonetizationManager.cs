@@ -26,19 +26,24 @@ namespace GalacticNexus.Scripts.Monetization
         {
             Debug.Log("Purchasing No Ads...");
             // Satın alma başarılıysa:
-            if (_em.TryGetSingletonRW<MonetizationData>(out var monData))
+            var qMon = _em.CreateEntityQuery(typeof(MonetizationData));
+            if (!qMon.IsEmptyIgnoreFilter)
             {
-                monData.ValueRW.IsNoAdsPurchased = true;
+                var monData = qMon.GetSingleton<MonetizationData>();
+                monData.IsNoAdsPurchased = true;
+                qMon.SetSingleton(monData);
             }
         }
 
         private void UpdateAdMultiplier(float multiplier, float duration)
         {
-            if (_em.TryGetSingletonRW<MonetizationData>(out var monData))
+            var qMon = _em.CreateEntityQuery(typeof(MonetizationData));
+            if (!qMon.IsEmptyIgnoreFilter)
             {
-                monData.ValueRW.LastAdMultiplier = multiplier;
-                // Süreyi ekle ve 24 saatle sınırla
-                monData.ValueRW.AdBoostRemainingSeconds = math.min(86400f, monData.ValueRO.AdBoostRemainingSeconds + duration);
+                var monData = qMon.GetSingleton<MonetizationData>();
+                monData.LastAdMultiplier = multiplier;
+                monData.AdBoostRemainingSeconds = math.min(86400f, monData.AdBoostRemainingSeconds + duration);
+                qMon.SetSingleton(monData);
             }
         }
     }

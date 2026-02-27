@@ -15,13 +15,13 @@ namespace GalacticNexus.Scripts.Systems
         {
             // Tekil ekonomi ve pazar verilerini bul
             if (!SystemAPI.TryGetSingletonRW<EconomyData>(out var economy)) return;
-            if (!SystemAPI.TryGetSingletonRO<GlobalMarketData>(out var market)) return;
+            if (!SystemAPI.TryGetSingleton<GlobalMarketData>(out var market)) return;
 
             var ecbSingleton = SystemAPI.GetSingleton<EndSimulationEntityCommandBufferSystem.Singleton>();
             var ecb = ecbSingleton.CreateCommandBuffer(state.WorldUnmanaged);
 
             // Servisi bitmiş ve ödeme bekleyen gemileri tara (Taxes statesi)
-            foreach (var (ship, reward, entity) in SystemAPI.Query<RefRW<ShipData>, RefRO<RewardData>, Entity>().WithAll<ShipTag>())
+            foreach (var (ship, reward, entity) in SystemAPI.Query<RefRW<ShipData>, RefRO<RewardData>>().WithAll<ShipTag>().WithEntityAccess())
             {
                 if (ship.ValueRO.CurrentState == ShipState.Taxes)
                 {

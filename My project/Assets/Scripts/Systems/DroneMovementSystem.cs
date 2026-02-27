@@ -3,6 +3,7 @@ using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
 using GalacticNexus.Scripts.Components;
+using GalacticNexus.Scripts.Juice;
 
 namespace GalacticNexus.Scripts.Systems
 {
@@ -60,7 +61,7 @@ namespace GalacticNexus.Scripts.Systems
                 }
             }
 
-            foreach (var (transform, droneData, entity) in SystemAPI.Query<RefRW<LocalTransform>, RefRW<DroneData>, Entity>().WithAll<DroneTag>())
+            foreach (var (transform, droneData, entity) in SystemAPI.Query<RefRW<LocalTransform>, RefRW<DroneData>>().WithAll<DroneTag>().WithEntityAccess())
             {
                 if (droneData.ValueRO.IsMalfunctioning) continue;
 

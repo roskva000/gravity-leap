@@ -54,7 +54,7 @@ namespace GalacticNexus.Scripts.Systems
                 }
 
                 // Raid Damage Logic
-                ProcessRaidDamage(ref state, deltaTime, hasShield, ref shield);
+                ProcessRaidDamage(ref state, deltaTime, hasShield, shield);
             }
         }
 
