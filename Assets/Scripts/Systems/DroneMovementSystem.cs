@@ -19,6 +19,14 @@ namespace GalacticNexus.Scripts.Systems
             float passiveRegen = upgrade.SolarCollectorLevel * 0.1f * deltaTime;
             bool blackMarketActive = false;
             float4 dirtyYellow = new float4(0.8f, 0.7f, 0.1f, 1.0f);
+            float4 buffWhite = new float4(1.0f, 1.0f, 1.0f, 5.0f); // High intensity white
+
+            // Task T: Detect Nexus Buff Event
+            bool nexusFlashActive = false;
+            foreach (var ev in SystemAPI.Query<RefRO<GameEvent>>())
+            {
+                if (ev.ValueRO.Value == 800f) nexusFlashActive = true;
+            }
 
             var ecb = SystemAPI.GetSingleton<BeginSimulationEntityCommandBufferSystem.Singleton>().CreateCommandBuffer(state.WorldUnmanaged);
 
@@ -66,8 +74,11 @@ namespace GalacticNexus.Scripts.Systems
                 }
 
                 float consumptionMultiplier = blackMarketActive ? 0 : 1.0f;
-                
-                if (blackMarketActive)
+                consumptionMultiplier *= (1.0f - upgrade.NexusBuffBattery); // Apply permanent buff efficiency
+
+                if (nexusFlashActive)
+                    ecb.AddComponent(entity, new NeonColorOverride { Value = buffWhite });
+                else if (blackMarketActive)
                     ecb.AddComponent(entity, new NeonColorOverride { Value = dirtyYellow });
                 else
                     ecb.RemoveComponent<NeonColorOverride>(entity);
@@ -96,7 +107,7 @@ namespace GalacticNexus.Scripts.Systems
                 {
                     // Move to Target
                     float3 direction = math.normalize(droneData.ValueRO.TargetPosition - transform.ValueRO.Position);
-                    float moveDist = (5.0f + upgrade.GetDroneSpeedBonus()) * (droneData.ValueRO.IsOverclocked ? 2.0f : 1.0f) * deltaTime;
+                    float moveDist = (5.0f + upgrade.GetDroneSpeedBonus()) * (1.0f + upgrade.NexusBuffSpeed) * (droneData.ValueRO.IsOverclocked ? 2.0f : 1.0f) * deltaTime;
                     
                     if (math.distance(transform.ValueRO.Position, droneData.ValueRO.TargetPosition) > 0.1f)
                     {

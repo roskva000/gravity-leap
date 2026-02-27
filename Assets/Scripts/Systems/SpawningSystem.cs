@@ -22,6 +22,9 @@ namespace GalacticNexus.Scripts.Systems
         {
             float currentTime = (float)SystemAPI.Time.ElapsedTime;
             if (!SystemAPI.TryGetSingleton<UpgradeData>(out var upgrade)) return;
+            if (!SystemAPI.TryGetSingleton<EconomyData>(out var economy)) return;
+
+            float nexusFactor = economy.NexusProgress; // 0.0 to 1.0
 
             // Bekleyen gemi sayısını kontrol et
             int waitingCount = 0;
@@ -64,8 +67,8 @@ namespace GalacticNexus.Scripts.Systems
 
                     ecb.SetComponent(newShip, new ShipData
                     {
-                        Health = 100f,
-                        Fuel = rand.NextFloat(0.1f, 0.5f), 
+                        Health = 100f * (1.0f - nexusFactor * 0.5f),
+                        Fuel = rand.NextFloat(0.1f, 0.5f) * (1.0f - nexusFactor * 0.5f), 
                         CargoCapacity = isLegendary ? 5000f : 1000f,
                         CurrentState = ShipState.Waiting,
                         OwnerFraction = randomFraction,
@@ -77,9 +80,10 @@ namespace GalacticNexus.Scripts.Systems
                     });
 
                     // Ödül verisini ekle
+                    float baseRewardScale = 1.0f + nexusFactor; // Up to 2x base reward
                     ecb.AddComponent(newShip, new RewardData
                     {
-                        BaseReward = isLegendary ? 500f : 50f,
+                        BaseReward = (isLegendary ? 500f : 50f) * baseRewardScale,
                         FractionMultiplier = (randomFraction == Fraction.VoidWalkers) ? 1.5f : 1.0f
                     });
 
@@ -95,7 +99,7 @@ namespace GalacticNexus.Scripts.Systems
                     }
 
                     // Bir sonraki spawn zamanını belirle (Dinamik Trafik)
-                    float dynamicInterval = spawner.ValueRO.SpawnInterval / (1.0f + (upgrade.DockLevel * 0.25f));
+                    float dynamicInterval = spawner.ValueRO.SpawnInterval / (1.0f + (upgrade.DockLevel * 0.25f) + (nexusFactor * 2.0f));
                     dynamicInterval = math.max(1.5f, dynamicInterval); // Hard-cap limit
 
                     spawner.ValueRW.NextSpawnTime = currentTime + dynamicInterval;

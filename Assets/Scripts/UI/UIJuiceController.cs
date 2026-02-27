@@ -44,8 +44,26 @@ namespace GalacticNexus.Scripts.UI
             targetValue = newValue;
         }
 
+        private bool isVibing;
+        private Color goldenColor = new Color(1f, 0.84f, 0f, 1f); // #FFD700
+
+        public void SetGoldenMode(bool enabled)
+        {
+            baseColor = enabled ? goldenColor : Color.white;
+            if (scrapText != null) scrapText.color = baseColor;
+        }
+
+        public void SetVibeMode(bool enabled) => isVibing = enabled;
+
         private void Update()
         {
+            // Vibe effect (Continuous subtle vibration)
+            if (isVibing)
+            {
+                float vibe = Mathf.Sin(Time.time * 5f) * 0.05f;
+                transform.localScale = originalScale * (1f + vibe);
+            }
+
             // Spring-like smooth movement for the number
             double prevValue = displayedValue;
             displayedValue = Mathf.SmoothDamp((float)displayedValue, (float)targetValue, ref currentVelocity, smoothTime);

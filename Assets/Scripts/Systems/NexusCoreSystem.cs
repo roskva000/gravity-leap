@@ -39,8 +39,21 @@ namespace GalacticNexus.Scripts.Systems
 
         private void SpawnMegastructurePart(ref SystemState state)
         {
-            // Placeholder for instantiating megastructure parts around (0,0,0)
-            // In a real project, we would fetch a prefab from a config blob.
+            if (SystemAPI.TryGetSingletonRW<UpgradeData>(out var upgrade))
+            {
+                upgrade.ValueRW.NexusBuffSpeed += 0.05f;
+                upgrade.ValueRW.NexusBuffBattery += 0.05f;
+
+                // Signal drones to flash
+                var ecb = SystemAPI.GetSingleton<BeginSimulationEntityCommandBufferSystem.Singleton>().CreateCommandBuffer(state.WorldUnmanaged);
+                var eventEntity = ecb.CreateEntity();
+                ecb.AddComponent(eventEntity, new GameEvent
+                {
+                    Type = Juice.GameEventType.Warning, // Global indicator
+                    Position = float3.zero,
+                    Value = 800f // Magic number for NEXUS BUFF
+                });
+            }
         }
 
         private void TriggerNexusCompletion(ref SystemState state)

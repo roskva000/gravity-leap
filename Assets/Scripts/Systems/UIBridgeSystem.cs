@@ -10,9 +10,20 @@ namespace GalacticNexus.Scripts.Systems
             // Ekonomi verisini al
             if (!SystemAPI.TryGetSingleton<EconomyData>(out var economy)) return;
             
-            // UI referanslarını al (Managed component olduğu için SystemAPI.Query kullanıyoruz)
+            // UI referanslarını al
             foreach (var uiRefs in SystemAPI.Query<UIReferencesComponent>())
             {
+                if (economy.NexusComplete)
+                {
+                    if (uiRefs.ScrapJuice != null)
+                    {
+                        uiRefs.ScrapJuice.SetGoldenMode(true);
+                        uiRefs.ScrapJuice.SetVibeMode(true);
+                    }
+                    if (uiRefs.GemsText != null) uiRefs.GemsText.color = new UnityEngine.Color(1f, 0.84f, 0f);
+                    if (uiRefs.ScrapText != null) uiRefs.ScrapText.color = new UnityEngine.Color(1f, 0.84f, 0f);
+                }
+
                 if (uiRefs.ScrapJuice != null)
                     uiRefs.ScrapJuice.SetTargetValue(economy.ScrapCurrency);
                 else

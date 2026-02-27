@@ -8,6 +8,8 @@ namespace GalacticNexus.Scripts.Components
         public int DroneSpeedLevel;
         public int DroneBatteryLevel;
         public int SolarCollectorLevel;
+        public float NexusBuffSpeed;
+        public float NexusBuffBattery;
         public int ShieldLevel;
         public Entity DockPrefab;
 

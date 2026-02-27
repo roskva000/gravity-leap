@@ -104,6 +104,9 @@ namespace GalacticNexus.Scripts.Juice
                     // Task R: Black Market
                     else if (e.Value == 555f)
                         SpawnFloatingText(e.Position, "SINDICATO MODULE ACTIVE", true);
+                    // Task T: Nexus Buff
+                    else if (e.Value == 800f)
+                        SpawnFloatingText(e.Position, "NEXUS BUFF APPLIED!", false);
                     else
                         SpawnFloatingText(e.Position, "WARNING", true);
                     break;
