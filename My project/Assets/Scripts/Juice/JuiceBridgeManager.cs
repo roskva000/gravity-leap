@@ -1,8 +1,9 @@
 using UnityEngine;
 using Unity.Entities;
-using GalacticNexus.Scripts.Juice;
 using GalacticNexus.Scripts.Narrative;
 using TMPro;
+using GalacticNexus.Scripts.Components;
+using GalacticNexus.Scripts.Juice;
 
 namespace GalacticNexus.Scripts.Juice
 {
@@ -18,6 +19,9 @@ namespace GalacticNexus.Scripts.Juice
         public AudioClip WarningSound;
         public AudioClip MalfunctionSound;
         public AudioClip LegendaryGongSound;
+        
+        // Classic C# Bridge for UI and other systems
+        public static System.Action<double, double> OnEconomyUpdated;
 
         private UnityEngine.Pool.IObjectPool<GameObject> floatingTextPool;
 
@@ -70,9 +74,24 @@ namespace GalacticNexus.Scripts.Juice
                     break;
                     
                 case GameEventType.ScrapEarned:
-                    SpawnFloatingText(e.Position, $"+{e.Value:F0} SCRAP");
+                    if (e.Scale == 88.0f) // NEON FLAG
+                    {
+                        SpawnFloatingText(e.Position, $"+{e.Value:F1} NEON", false, true);
+                    }
+                    else
+                    {
+                        SpawnFloatingText(e.Position, $"+{e.Value:F0} SCRAP", false, false);
+                    }
+                    
                     if (GlobalAudioSource && SellSound) GlobalAudioSource.PlayOneShot(SellSound);
                     
+                    // Trigger Global Event for UI
+                    var worldRef = World.DefaultGameObjectInjectionWorld;
+                    if (worldRef != null && worldRef.EntityManager.CreateEntityQuery(typeof(EconomyData)).TryGetSingleton<EconomyData>(out var ecoData))
+                    {
+                         OnEconomyUpdated?.Invoke(ecoData.ScrapCurrency, ecoData.NeonCurrency);
+                    }
+
                     // Task C: Scale UI Pop
                     var w = World.DefaultGameObjectInjectionWorld;
                     if (w != null)
@@ -179,17 +198,17 @@ namespace GalacticNexus.Scripts.Juice
             }
         }
 
-        private void SpawnFloatingText(Vector3 pos, string text, bool isWarning = false)
+        private void SpawnFloatingText(Vector3 pos, string text, bool isWarning = false, bool isNeon = false)
         {
             if (!FloatingTextPrefab) return;
             
             var go = floatingTextPool.Get();
             go.transform.position = pos + Vector3.up * 2;
             go.transform.rotation = Quaternion.identity;
-
+ 
             if (go.TryGetComponent<FloatingTextJuice>(out var juice))
             {
-                juice.Initialize(text, floatingTextPool);
+                juice.Initialize(text, floatingTextPool, isNeon);
                 if (isWarning) juice.SetToWarning();
             }
             else

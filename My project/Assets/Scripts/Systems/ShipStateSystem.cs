@@ -80,7 +80,7 @@ namespace GalacticNexus.Scripts.Systems
                         }
                         else
                         {
-                            shipData.ValueRW.CurrentState = ShipState.Docked;
+                            shipData.ValueRW.CurrentState = shipData.ValueRO.Condition == ShipCondition.Wreck ? ShipState.Wreck : ShipState.Servicing;
                             transform.ValueRW.Position = target;
 
                             // Juicing: Docked Event
@@ -133,6 +133,18 @@ namespace GalacticNexus.Scripts.Systems
                                 Position = transform.ValueRO.Position,
                                 Value = 1.0f
                             });
+                        }
+                        break;
+
+                    case ShipState.Departing:
+                        // İstasyon merkezinden (0,0,0) uzağa doğru hareket et
+                        float3 exitDir = math.normalize(transform.ValueRO.Position);
+                        transform.ValueRW.Position += exitDir * deltaTime * shipData.ValueRO.MoveSpeed * 1.5f;
+                        
+                        // Yeterince uzaklaştıysa yok et
+                        if (math.length(transform.ValueRO.Position) > 100f)
+                        {
+                            ecb.DestroyEntity(entity);
                         }
                         break;
                 }

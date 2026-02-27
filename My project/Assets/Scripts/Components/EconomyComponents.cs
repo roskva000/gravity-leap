@@ -5,6 +5,7 @@ namespace GalacticNexus.Scripts.Components
     public struct EconomyData : IComponentData
     {
         public double ScrapCurrency;
+        public double NeonCurrency;
         public int TotalShipsServiced;
         public long LastSaveTimestamp;
         public double DarkMatter;

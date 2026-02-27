@@ -80,7 +80,8 @@ namespace GalacticNexus.Scripts.Components
     {
         Normal,
         Critical,
-        Legendary
+        Legendary,
+        Wreck
     }
 
     public enum Fraction

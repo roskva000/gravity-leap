@@ -56,17 +56,32 @@ namespace GalacticNexus.Scripts.Systems
                     }
 
                     economy.ValueRW.ScrapCurrency += finalReward;
+                    
+                    // Task: Neon kazanımı (Capacity based)
+                    double neonReward = (ship.ValueRO.CargoCapacity * 0.05f) * marketMultiplier * nexusMultiplier;
+                    if (ship.ValueRO.Condition == ShipCondition.Legendary) neonReward *= 2.0;
+                    economy.ValueRW.NeonCurrency += neonReward;
+                    
                     economy.ValueRW.TotalShipsServiced++;
 
-                    // VFX Olayı Fırlat (Juice)
-                    var eventEntity = ecb.CreateEntity();
-                    ecb.AddComponent(eventEntity, new GameEvent
+                    // VFX Olayı Fırlat (Juice) - Scrap
+                    var scrapEvent = ecb.CreateEntity();
+                    ecb.AddComponent(scrapEvent, new GameEvent
                     {
                         Type = GameEventType.ScrapEarned,
                         Position = SystemAPI.GetComponent<LocalTransform>(entity).Position,
                         Value = (float)finalReward,
-                        // Task C: Magnitude calculated from CargoCapacity (assuming 1.0 is default, larger is multiplier)
                         Scale = math.clamp(ship.ValueRO.CargoCapacity / 100f, 1f, 3f) 
+                    });
+
+                    // VFX Olayı Fırlat (Juice) - Neon
+                    var neonEvent = ecb.CreateEntity();
+                    ecb.AddComponent(neonEvent, new GameEvent
+                    {
+                        Type = GameEventType.ScrapEarned, // Reuse for floating text logic, value handling in bridge
+                        Position = SystemAPI.GetComponent<LocalTransform>(entity).Position + new float3(1, 1, 0),
+                        Value = (float)neonReward,
+                        Scale = 88.0f // Magic scale for NEON color flag in bridge
                     });
 
                     // Gemiyi ayrılma durumuna geçir

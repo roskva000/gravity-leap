@@ -19,14 +19,18 @@ namespace GalacticNexus.Scripts.Juice
         [SerializeField] private AnimationCurve alphaCurve = AnimationCurve.EaseInOut(0, 1, 1, 0);
         
         [Header("Color Transition")]
-        [SerializeField, ColorUsage(true, true)] private Color neonOrange = new Color(1f, 0.55f, 0f, 1f); // #FF8C00
-        [SerializeField] private Color rustBrown = new Color(0.55f, 0.27f, 0.07f, 1f); // #8B4513
+        [SerializeField, ColorUsage(true, true)] private Color neonOrange = new Color(1f, 0.55f, 0f, 1f); 
+        [SerializeField, ColorUsage(true, true)] private Color neonBlue = new Color(0f, 1f, 1f, 1f);
+        [SerializeField] private Color rustBrown = new Color(0.55f, 0.27f, 0.07f, 1f); 
+        [SerializeField] private Color deepPurple = new Color(0.54f, 0.17f, 0.89f, 1f);
 
         private TextMeshPro textMesh;
         private IObjectPool<GameObject> pool;
         private float timer;
         private Vector3 velocity;
         private Vector3 currentScale;
+        private Color startColor;
+        private Color endColor;
 
         private void Awake()
         {
@@ -34,12 +38,14 @@ namespace GalacticNexus.Scripts.Juice
             currentScale = transform.localScale;
         }
 
-        public void Initialize(string text, IObjectPool<GameObject> parentPool)
+        public void Initialize(string text, IObjectPool<GameObject> parentPool, bool isNeon = false)
         {
             if (textMesh != null)
             {
                 textMesh.text = text;
-                textMesh.color = neonOrange; // Start with neon orange
+                startColor = isNeon ? neonBlue : neonOrange;
+                endColor = isNeon ? deepPurple : rustBrown;
+                textMesh.color = startColor;
             }
             
             pool = parentPool;
@@ -79,7 +85,7 @@ namespace GalacticNexus.Scripts.Juice
             // Color and Alpha transition
             if (textMesh != null)
             {
-                Color c = Color.Lerp(neonOrange, rustBrown, progress);
+                Color c = Color.Lerp(startColor, endColor, progress);
                 c.a *= alphaCurve.Evaluate(progress);
                 textMesh.color = c;
             }

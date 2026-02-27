@@ -33,7 +33,13 @@ namespace GalacticNexus.Scripts.Systems
                     uiRefs.TargetScrap = economy.ScrapCurrency; // Fallback
                 
                 if (uiRefs.GemsText != null)
-                    uiRefs.GemsText.SetText($"GEMS: {economy.TotalShipsServiced}");
+                    uiRefs.GemsText.SetText($"NEON: {economy.NeonCurrency:F0}");
+                
+                if (uiRefs.ActiveShipsText != null)
+                {
+                     // Task: Anlık aktif gemi sayısını göster (İsteğe bağlı ekleme)
+                     uiRefs.ActiveShipsText.SetText($"SERVICED: {economy.TotalShipsServiced}");
+                }
 
                 // Task AA: Post-Processing Sync
                 if (uiRefs.PostProcessVolume != null)

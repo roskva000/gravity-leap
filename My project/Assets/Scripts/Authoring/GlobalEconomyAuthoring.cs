@@ -16,7 +16,10 @@ namespace GalacticNexus.Scripts.Authoring
                 AddComponent(entity, new EconomyData
                 {
                     ScrapCurrency = authoring.InitialScrap,
-                    TotalShipsServiced = 0
+                    NeonCurrency = 0,
+                    TotalShipsServiced = 0,
+                    TutorialStep = 0,
+                    NexusProgress = 0
                 });
             }
         }
