@@ -23,8 +23,7 @@ namespace GalacticNexus.Scripts.UI
         private float popTimer;
         private bool isPopping;
 
-        // Reference caching to avoid GC
-        private static readonly string PREFIX = "SCRAP: ";
+        [SerializeField] private string prefix = "SCRAP: ";
 
         private void Awake()
         {
@@ -81,7 +80,7 @@ namespace GalacticNexus.Scripts.UI
         {
             if (scrapText != null)
             {
-                scrapText.text = $"{PREFIX}{displayedValue:F0}";
+                scrapText.text = $"{prefix}{displayedValue:F0}";
             }
         }
 

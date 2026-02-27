@@ -116,12 +116,13 @@ namespace GalacticNexus.Scripts.Systems
                 else
                 {
                     // Move to Target
-                    float3 direction = math.normalize(droneData.ValueRO.TargetPosition - transform.ValueRO.Position);
-                    float moveDist = (5.0f + upgrade.GetDroneSpeedBonus()) * (1.0f + upgrade.NexusBuffSpeed) * (droneData.ValueRO.IsOverclocked ? 2.0f : 1.0f) * deltaTime;
-                    
-                    if (math.distance(transform.ValueRO.Position, droneData.ValueRO.TargetPosition) > 0.1f)
+                    float distanceToTarget = math.distance(transform.ValueRO.Position, droneData.ValueRO.TargetPosition);
+                    if (distanceToTarget > 0.1f)
                     {
-                        transform.ValueRW.Position += direction * moveDist;
+                        float3 direction = (droneData.ValueRO.TargetPosition - transform.ValueRO.Position) / distanceToTarget;
+                        float moveDist = (5.0f + upgrade.GetDroneSpeedBonus()) * (1.0f + upgrade.NexusBuffSpeed) * (droneData.ValueRO.IsOverclocked ? 2.0f : 1.0f) * deltaTime;
+                        
+                        transform.ValueRW.Position += direction * math.min(moveDist, distanceToTarget);
                         droneData.ValueRW.BatteryLevel -= deltaTime * 0.02f * consumptionMultiplier * batteryEfficiency;
                     }
                     else if (droneData.ValueRO.CurrentState == DroneState.Working)

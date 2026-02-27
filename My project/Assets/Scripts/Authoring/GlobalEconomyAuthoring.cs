@@ -18,8 +18,9 @@ namespace GalacticNexus.Scripts.Authoring
                     ScrapCurrency = authoring.InitialScrap,
                     NeonCurrency = 0,
                     TotalShipsServiced = 0,
-                    TutorialStep = 0,
-                    NexusProgress = 0
+                    NexusComplete = true, // Hemen akışı görmeliyiz
+                    TutorialStep = 10,  // Spawner blocker'ı bypass et (Step < 3 engeli var)
+                    NexusProgress = 0.1f
                 });
             }
         }

@@ -2,6 +2,7 @@ using Unity.Entities;
 using UnityEngine;
 using TMPro;
 using GalacticNexus.Scripts.Components;
+using GalacticNexus.Scripts.UI;
 
 namespace GalacticNexus.Scripts.Authoring
 {
@@ -10,6 +11,8 @@ namespace GalacticNexus.Scripts.Authoring
         public TextMeshProUGUI ScrapText;
         public TextMeshProUGUI GemsText;
         public TextMeshProUGUI ActiveShipsText;
+        public UIJuiceController ScrapJuice;
+        public UIJuiceController NeonJuice;
 
         public class UIBridgeBaker : Baker<UIBridgeAuthoring>
         {
@@ -22,7 +25,9 @@ namespace GalacticNexus.Scripts.Authoring
                 {
                     ScrapText = authoring.ScrapText,
                     GemsText = authoring.GemsText,
-                    ActiveShipsText = authoring.ActiveShipsText
+                    ActiveShipsText = authoring.ActiveShipsText,
+                    ScrapJuice = authoring.ScrapJuice,
+                    NeonJuice = authoring.NeonJuice
                 });
             }
         }

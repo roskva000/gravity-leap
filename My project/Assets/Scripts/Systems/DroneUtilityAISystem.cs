@@ -34,7 +34,7 @@ namespace GalacticNexus.Scripts.Systems
             int index = 0;
             foreach (var (shipData, shipTransform, shipEntity) in SystemAPI.Query<RefRO<ShipData>, RefRO<LocalTransform>>().WithAll<ShipTag>().WithEntityAccess())
             {
-                if (shipData.ValueRO.CurrentState == ShipState.Docked)
+                if (shipData.ValueRO.CurrentState == ShipState.Servicing || shipData.ValueRO.CurrentState == ShipState.Wreck)
                 {
                     shipsData[index] = shipData.ValueRO;
                     shipsPositions[index] = shipTransform.ValueRO.Position;

@@ -19,7 +19,7 @@ namespace GalacticNexus.Scripts.Authoring
                 {
                     ShipPrefab = GetEntity(authoring.ShipPrefab, TransformUsageFlags.Dynamic),
                     SpawnInterval = authoring.SpawnInterval,
-                    NextSpawnTime = 0f,
+                    NextSpawnTime = 0.1f,
                     SpawnPosition = authoring.SpawnPosition,
                     RandomSeed = 12345
                 });

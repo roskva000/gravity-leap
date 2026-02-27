@@ -32,7 +32,10 @@ namespace GalacticNexus.Scripts.Systems
                 else
                     uiRefs.TargetScrap = economy.ScrapCurrency; // Fallback
                 
-                if (uiRefs.GemsText != null)
+                if (uiRefs.NeonJuice != null)
+                    uiRefs.NeonJuice.SetTargetValue(economy.NeonCurrency);
+
+                if (uiRefs.GemsText != null && uiRefs.NeonJuice == null) // Only manual update if juice is missing
                     uiRefs.GemsText.SetText($"NEON: {economy.NeonCurrency:F0}");
                 
                 if (uiRefs.ActiveShipsText != null)

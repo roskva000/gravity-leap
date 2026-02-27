@@ -4,6 +4,7 @@ using GalacticNexus.Scripts.Narrative;
 using TMPro;
 using GalacticNexus.Scripts.Components;
 using GalacticNexus.Scripts.Juice;
+using GalacticNexus.Scripts.UI;
 
 namespace GalacticNexus.Scripts.Juice
 {
@@ -12,6 +13,7 @@ namespace GalacticNexus.Scripts.Juice
         public ParticleSystem DockedVFX;
         public ParticleSystem ServiceFinishedVFX;
         public GameObject FloatingTextPrefab;
+        public ParticleSystem NeonBurstVFX;
         public NarrativeUIController NarrativeUI;
         public AudioSource GlobalAudioSource;
         public AudioClip SellSound;
@@ -77,10 +79,12 @@ namespace GalacticNexus.Scripts.Juice
                     if (e.Scale == 88.0f) // NEON FLAG
                     {
                         SpawnFloatingText(e.Position, $"+{e.Value:F1} NEON", false, true);
+                        if (NeonBurstVFX) Instantiate(NeonBurstVFX, e.Position, Quaternion.identity);
                     }
                     else
                     {
                         SpawnFloatingText(e.Position, $"+{e.Value:F0} SCRAP", false, false);
+                        if (DockedVFX) Instantiate(DockedVFX, e.Position, Quaternion.identity);
                     }
                     
                     if (GlobalAudioSource && SellSound) GlobalAudioSource.PlayOneShot(SellSound);

@@ -12,6 +12,7 @@ namespace GalacticNexus.Scripts.Components
         public TextMeshProUGUI GemsText;
         public TextMeshProUGUI ActiveShipsText;
         public UIJuiceController ScrapJuice;
+        public UIJuiceController NeonJuice;
         public Volume PostProcessVolume;
         public double TargetScrap;
     }

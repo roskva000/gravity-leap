@@ -25,8 +25,8 @@ namespace GalacticNexus.Scripts.Systems
             if (!SystemAPI.TryGetSingleton<UpgradeData>(out var upgrade)) return;
             if (!SystemAPI.TryGetSingleton<EconomyData>(out var economy)) return;
 
-            // Tutorial Check: Only spawn if tutorial is complete
-            if (economy.TutorialStep < 3) return;
+            // Tutorial Check: Only spawn if tutorial is complete (DISABLED FOR DEBUGGING)
+            // if (economy.TutorialStep < 3) return;
 
             float nexusFactor = economy.NexusProgress; // 0.0 to 1.0
 
