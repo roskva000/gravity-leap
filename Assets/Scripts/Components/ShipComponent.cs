@@ -25,6 +25,9 @@ namespace GalacticNexus.Scripts.Components
         public ShipState CurrentState;
         public Fraction OwnerFraction;
         public float RepairProgress;
+        public ShipCondition Condition;
+        public float HullIntegrity;
+        public float MoveSpeed;
         
         // Yanaşılacak dock'un koordinatları ve referansı
         public float3 TargetDockPosition;
@@ -39,6 +42,12 @@ namespace GalacticNexus.Scripts.Components
         Servicing,
         Taxes,
         Departing
+    }
+
+    public enum ShipCondition
+    {
+        Normal,
+        Critical
     }
 
     public enum Fraction

@@ -28,6 +28,12 @@ namespace GalacticNexus.Scripts.Systems
                     double prestigeMultiplier = 1.0 + (economy.ValueRO.DarkMatter * 0.10);
                     double finalReward = reward.ValueRO.BaseReward * reward.ValueRO.FractionMultiplier * prestigeMultiplier;
                     
+                    // Task C: Critical condition gives 300% more reward
+                    if (ship.ValueRO.Condition == ShipCondition.Critical)
+                    {
+                        finalReward *= 3.0;
+                    }
+
                     economy.ValueRW.ScrapCurrency += finalReward;
                     economy.ValueRW.TotalShipsServiced++;
 

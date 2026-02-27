@@ -13,10 +13,24 @@ namespace GalacticNexus.Scripts.Systems
         [BurstCompile]
         public void OnUpdate(ref SystemState state)
         {
-            var ecb = SystemAPI.GetSingleton<BeginSimulationEntityCommandBufferSystem.Singleton>().CreateCommandBuffer(state.WorldUnmanaged);
             float deltaTime = SystemAPI.Time.DeltaTime;
+            var ecb = SystemAPI.GetSingleton<BeginSimulationEntityCommandBufferSystem.Singleton>().CreateCommandBuffer(state.WorldUnmanaged);
 
-            foreach (var (shipData, rust, neon, transform) in SystemAPI.Query<RefRW<ShipData>, RefRW<RustAmountOverride>, RefRW<NeonPowerOverride>, RefRW<LocalTransform>>())
+            // Step 1: Count drones servicing each ship
+            // Using a simple native map for counting (shipEntity -> droneCount)
+            var droneCounts = new Unity.Collections.NativeParallelHashMap<Entity, int>(100, Unity.Collections.Allocator.Temp);
+            foreach (var drone in SystemAPI.Query<RefRO<DroneData>>())
+            {
+                if (drone.ValueRO.IsBusy && drone.ValueRO.CurrentState == DroneState.Working && drone.ValueRO.CurrentTargetEntity != Entity.Null)
+                {
+                    if (droneCounts.TryGetValue(drone.ValueRO.CurrentTargetEntity, out int count))
+                        droneCounts[drone.ValueRO.CurrentTargetEntity] = count + 1;
+                    else
+                        droneCounts.TryAdd(drone.ValueRO.CurrentTargetEntity, 1);
+                }
+            }
+
+            foreach (var (shipData, rust, neon, transform, entity) in SystemAPI.Query<RefRW<ShipData>, RefRW<RustAmountOverride>, RefRW<NeonPowerOverride>, RefRW<LocalTransform>>().WithEntityAccess())
             {
                 switch (shipData.ValueRO.CurrentState)
                 {
@@ -27,7 +41,8 @@ namespace GalacticNexus.Scripts.Systems
                         if (dist > 0.1f)
                         {
                             float3 dir = math.normalize(target - transform.ValueRO.Position);
-                            transform.ValueRW.Position += dir * deltaTime * 5f;
+                            // Task C: Use MoveSpeed (Critical ships are slower)
+                            transform.ValueRW.Position += dir * deltaTime * shipData.ValueRO.MoveSpeed;
                             transform.ValueRW.Rotation = math.slerp(transform.ValueRO.Rotation, 
                                 quaternion.LookRotationSafe(dir, math.up()), deltaTime * 2f);
                         }
@@ -48,20 +63,27 @@ namespace GalacticNexus.Scripts.Systems
                         break;
 
                     case ShipState.Servicing:
-                        // Task A: Update RustAmount (0.8 -> 0.1) based on RepairProgress (0 -> 1)
-                        rust.ValueRW.Value = math.lerp(0.8f, 0.1f, shipData.ValueRO.RepairProgress);
+                        // Task C: Dynamic Repair Speed based on drone count
+                        int activeDrones = 0;
+                        droneCounts.TryGetValue(entity, out activeDrones);
                         
-                        // Neon power base (pulse back to 1.0 if it was boosted)
+                        if (activeDrones > 0)
+                        {
+                            float baseRepairRate = 0.2f;
+                            shipData.ValueRW.RepairProgress += deltaTime * baseRepairRate * activeDrones;
+                        }
+
+                        // Task A: driving _RustAmount (1.0 - RepairProgress)
+                        rust.ValueRW.Value = math.saturate(1.0f - shipData.ValueRO.RepairProgress);
+                        
+                        // Neon power stabilization
                         neon.ValueRW.Value = math.lerp(neon.ValueRO.Value, 1.0f, deltaTime * 2f);
 
                         if (shipData.ValueRO.RepairProgress >= 1.0f)
                         {
                             shipData.ValueRW.CurrentState = ShipState.Taxes;
-                            
-                            // Task A: Neon Pulse on completion
-                            neon.ValueRW.Value = 10.0f; 
-                            
-                            // Juicing: Service Finished Event (Optional highlight)
+                            neon.ValueRW.Value = 10.0f; // Neon Pulse
+
                             var serviceDoneEntity = ecb.CreateEntity();
                             ecb.AddComponent(serviceDoneEntity, new GameEvent
                             {
@@ -73,6 +95,8 @@ namespace GalacticNexus.Scripts.Systems
                         break;
                 }
             }
+
+            droneCounts.Dispose();
         }
     }
 }

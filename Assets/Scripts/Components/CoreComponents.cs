@@ -20,6 +20,7 @@ namespace GalacticNexus.Scripts.Components
         public float3 TargetPosition;
         public Entity CurrentTargetEntity;
         public bool IsBusy;
+        public bool WasBatteryWarningSent;
     }
 
     public struct DockTag : IComponentData { }

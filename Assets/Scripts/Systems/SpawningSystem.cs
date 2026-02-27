@@ -53,6 +53,8 @@ namespace GalacticNexus.Scripts.Systems
                     ecb.SetComponent(newShip, LocalTransform.FromPosition(spawner.ValueRO.SpawnPosition));
                     
                     // Gemi verilerini güncelle
+                    bool isCritical = rand.NextFloat(0, 1) < 0.2f;
+                    
                     ecb.SetComponent(newShip, new ShipData
                     {
                         Health = 100f,
@@ -60,7 +62,10 @@ namespace GalacticNexus.Scripts.Systems
                         CargoCapacity = 1000f,
                         CurrentState = ShipState.Waiting,
                         OwnerFraction = randomFraction,
-                        RepairProgress = 0f
+                        RepairProgress = 0f,
+                        Condition = isCritical ? ShipCondition.Critical : ShipCondition.Normal,
+                        HullIntegrity = isCritical ? 0.3f : 1.0f,
+                        MoveSpeed = isCritical ? 2.5f : 5.0f
                         // TargetDockPosition DockManagementSystem tarafından atanacak
                     });
 

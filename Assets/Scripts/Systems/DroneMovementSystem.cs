@@ -17,6 +17,8 @@ namespace GalacticNexus.Scripts.Systems
 
             float batteryEfficiency = 1.0f - upgrade.GetBatteryEfficiency(); // Upgrade verimliliği
 
+            var ecb = SystemAPI.GetSingleton<BeginSimulationEntityCommandBufferSystem.Singleton>().CreateCommandBuffer(state.WorldUnmanaged);
+
             foreach (var (transform, droneData) in SystemAPI.Query<RefRW<LocalTransform>, RefRW<DroneData>>().WithAll<DroneTag>())
             {
                 // Durum Yönetimi (FSM)
@@ -25,13 +27,15 @@ namespace GalacticNexus.Scripts.Systems
                     // Şarj ol (0.2f per second)
                     droneData.ValueRW.BatteryLevel = math.min(1.0f, droneData.ValueRO.BatteryLevel + deltaTime * 0.2f);
                     
-                    // Şarj noktasına git (Merkez)
-                    MoveToTarget(ref transform.ValueRW, new float3(0, 0, 0), droneData.ValueRO.Speed, deltaTime);
-
+                    // Şarj bittiğinde bayrağı sıfırla
                     if (droneData.ValueRO.BatteryLevel >= 1.0f)
                     {
                         droneData.ValueRW.CurrentState = DroneState.Idle;
+                        droneData.ValueRW.WasBatteryWarningSent = false;
                     }
+                    
+                    // Şarj noktasına git (Merkez)
+                    MoveToTarget(ref transform.ValueRW, new float3(0, 0, 0), droneData.ValueRO.Speed, deltaTime);
                     continue;
                 }
 
@@ -48,9 +52,22 @@ namespace GalacticNexus.Scripts.Systems
                 // Working Durumu - Şarj Tüketimi
                 droneData.ValueRW.BatteryLevel -= deltaTime * 0.05f * batteryEfficiency;
 
-                // Kritik Şarj Kontrolü
+                // Kritik Şarj Kontrolü (Tek seferlik uyarı)
                 if (droneData.ValueRO.BatteryLevel < 0.2f)
                 {
+                    if (!droneData.ValueRO.WasBatteryWarningSent)
+                    {
+                        droneData.ValueRW.WasBatteryWarningSent = true;
+                        
+                        var eventEntity = ecb.CreateEntity();
+                        ecb.AddComponent(eventEntity, new GameEvent
+                        {
+                            Type = GameEventType.Warning,
+                            Position = transform.ValueRO.Position,
+                            Value = 0f // 0 for battery alert
+                        });
+                    }
+
                     droneData.ValueRW.IsBusy = false;
                     droneData.ValueRW.CurrentTargetEntity = Entity.Null;
                     droneData.ValueRW.CurrentState = DroneState.Charging;
@@ -66,25 +83,8 @@ namespace GalacticNexus.Scripts.Systems
                 }
                 else
                 {
-                    // Hedefe ulaşıldı
-                    if (SystemAPI.HasComponent<ShipData>(droneData.ValueRO.CurrentTargetEntity))
-                    {
-                        var ship = SystemAPI.GetComponentRW<ShipData>(droneData.ValueRO.CurrentTargetEntity);
-                        
-                        if (ship.ValueRO.CurrentState == ShipState.Docked)
-                        {
-                            ship.ValueRW.CurrentState = ShipState.Servicing;
-                        }
-
-                        ship.ValueRW.RepairProgress += deltaTime * 0.2f; 
-
-                        if (ship.ValueRO.RepairProgress >= 1.0f)
-                        {
-                            droneData.ValueRW.IsBusy = false;
-                            droneData.ValueRW.CurrentState = DroneState.Idle;
-                        }
-                    }
-                    else
+                    // Hedefe ulaşıldı - Repair logic removed here, now handled in ShipStateSystem
+                    if (!SystemAPI.HasComponent<ShipData>(droneData.ValueRO.CurrentTargetEntity))
                     {
                         droneData.ValueRW.IsBusy = false;
                         droneData.ValueRW.CurrentState = DroneState.Idle;
