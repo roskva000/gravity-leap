@@ -73,7 +73,8 @@ namespace GalacticNexus.Scripts.Components
     public enum ShipCondition
     {
         Normal,
-        Critical
+        Critical,
+        Legendary
     }
 
     public enum Fraction

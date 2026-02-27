@@ -27,6 +27,13 @@ namespace GalacticNexus.Scripts.Components
         public UpgradeType Type;
     }
 
+    public struct BlackMarketModule : IComponentData
+    {
+        public float Timer;
+        public bool IsActive;
+        public bool PenaltyActive;
+    }
+
     public enum UpgradeType
     {
         DockCapacity,

@@ -95,6 +95,15 @@ namespace GalacticNexus.Scripts.Juice
                     // Task M: Syndicate Raid
                     else if (e.Value == 666f)
                         SpawnFloatingText(e.Position, "SYNDICATE RAID!", true);
+                    // Task P: Nexus Completed
+                    else if (e.Value == 777f)
+                        SpawnFloatingText(e.Position, "GALACTIC NEXUS COMPLETED", false);
+                    // Task Q: Legendary Ship
+                    else if (e.Value == 888f)
+                        SpawnFloatingText(e.Position, "LEGENDARY SHIP DETECTED", false);
+                    // Task R: Black Market
+                    else if (e.Value == 555f)
+                        SpawnFloatingText(e.Position, "SINDICATO MODULE ACTIVE", true);
                     else
                         SpawnFloatingText(e.Position, "WARNING", true);
                     break;

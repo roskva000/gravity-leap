@@ -9,6 +9,8 @@ namespace GalacticNexus.Scripts.Components
         public long LastSaveTimestamp;
         public double DarkMatter;
         public int PrestigeCount;
+        public float NexusProgress;
+        public bool NexusComplete;
     }
 
     public struct GlobalMarketData : IComponentData

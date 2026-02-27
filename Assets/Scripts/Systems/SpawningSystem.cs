@@ -53,29 +53,46 @@ namespace GalacticNexus.Scripts.Systems
                     ecb.SetComponent(newShip, LocalTransform.FromPosition(spawner.ValueRO.SpawnPosition));
                     
                     // Gemi verilerini güncelle
-                    bool isCritical = rand.NextFloat(0, 1) < 0.2f;
+                    float spawnRoll = rand.NextFloat(0, 1);
+                    bool isLegendary = spawnRoll < 0.01f;
+                    bool isCritical = !isLegendary && spawnRoll < 0.2f;
                     
+                    if (isLegendary)
+                    {
+                        ecb.SetComponent(newShip, LocalTransform.FromPosition(spawner.ValueRO.SpawnPosition).WithScale(5.0f));
+                    }
+
                     ecb.SetComponent(newShip, new ShipData
                     {
                         Health = 100f,
-                        Fuel = rand.NextFloat(0.1f, 0.5f), // Yarım depo gelmiş
-                        CargoCapacity = 1000f,
+                        Fuel = rand.NextFloat(0.1f, 0.5f), 
+                        CargoCapacity = isLegendary ? 5000f : 1000f,
                         CurrentState = ShipState.Waiting,
                         OwnerFraction = randomFraction,
                         RepairProgress = 0f,
-                        Condition = isCritical ? ShipCondition.Critical : ShipCondition.Normal,
-                        HullIntegrity = isCritical ? 0.3f : 1.0f,
-                        MoveSpeed = isCritical ? 2.5f : 5.0f,
-                        RequiredDroneCount = 1
-                        // TargetDockPosition DockManagementSystem tarafından atanacak
+                        Condition = isLegendary ? ShipCondition.Legendary : (isCritical ? ShipCondition.Critical : ShipCondition.Normal),
+                        HullIntegrity = isLegendary ? 0.5f : (isCritical ? 0.3f : 1.0f),
+                        MoveSpeed = isLegendary ? 1.5f : (isCritical ? 2.5f : 5.0f),
+                        RequiredDroneCount = isLegendary ? 10 : 1
                     });
 
-                    // Ödül verisini ekle (Dinamik ekonomik veri)
+                    // Ödül verisini ekle
                     ecb.AddComponent(newShip, new RewardData
                     {
-                        BaseReward = 50f,
+                        BaseReward = isLegendary ? 500f : 50f,
                         FractionMultiplier = (randomFraction == Fraction.VoidWalkers) ? 1.5f : 1.0f
                     });
+
+                    if (isLegendary)
+                    {
+                        var eventEntity = ecb.CreateEntity();
+                        ecb.AddComponent(eventEntity, new GameEvent
+                        {
+                            Type = Juice.GameEventType.Warning,
+                            Position = spawner.ValueRO.SpawnPosition,
+                            Value = 888f // Magic number for LEGENDARY SPAWN
+                        });
+                    }
 
                     // Bir sonraki spawn zamanını belirle (Dinamik Trafik)
                     float dynamicInterval = spawner.ValueRO.SpawnInterval / (1.0f + (upgrade.DockLevel * 0.25f));
