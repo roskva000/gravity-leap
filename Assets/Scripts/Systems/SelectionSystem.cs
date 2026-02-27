@@ -50,6 +50,14 @@ namespace GalacticNexus.Scripts.Systems
                     ecb.AddComponent<SelectedTag>(hitEntity);
                     Debug.Log($"Ship Selected: {hitEntity}");
                 }
+                
+                // Task I: Drone Overclock Toggle
+                if (state.EntityManager.TryGetComponent<DroneData>(hitEntity, out var droneData))
+                {
+                    droneData.IsOverclocked = !droneData.IsOverclocked;
+                    ecb.SetComponent(hitEntity, droneData);
+                    Debug.Log($"Drone Overclocked: {droneData.IsOverclocked}");
+                }
             }
         }
     }

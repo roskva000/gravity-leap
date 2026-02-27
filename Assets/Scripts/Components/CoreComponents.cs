@@ -21,6 +21,8 @@ namespace GalacticNexus.Scripts.Components
         public Entity CurrentTargetEntity;
         public bool IsBusy;
         public bool WasBatteryWarningSent;
+        public bool IsOverclocked;
+        public bool IsMalfunctioning;
     }
 
     public struct DockTag : IComponentData { }

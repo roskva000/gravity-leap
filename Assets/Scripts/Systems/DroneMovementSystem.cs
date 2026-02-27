@@ -21,6 +21,29 @@ namespace GalacticNexus.Scripts.Systems
 
             foreach (var (transform, droneData) in SystemAPI.Query<RefRW<LocalTransform>, RefRW<DroneData>>().WithAll<DroneTag>())
             {
+                if (droneData.ValueRO.IsMalfunctioning) continue;
+
+                float consumptionMultiplier = 1.0f;
+                if (droneData.ValueRO.IsOverclocked)
+                {
+                    consumptionMultiplier = 4.0f; 
+                    
+                    var rand = new Unity.Mathematics.Random((uint)(SystemAPI.Time.ElapsedTime * 1000) + 1);
+                    if (rand.NextFloat() < 0.05f * deltaTime)
+                    {
+                        droneData.ValueRW.IsMalfunctioning = true;
+                        
+                        var arızaEvent = ecb.CreateEntity();
+                        ecb.AddComponent(arızaEvent, new GameEvent
+                        {
+                            Type = GameEventType.Warning,
+                            Position = transform.ValueRO.Position,
+                            Value = 2.0f 
+                        });
+                        continue;
+                    }
+                }
+
                 // Durum Yönetimi (FSM)
                 if (droneData.ValueRO.CurrentState == DroneState.Charging)
                 {
@@ -60,7 +83,7 @@ namespace GalacticNexus.Scripts.Systems
                 }
 
                 // Working Durumu - Şarj Tüketimi
-                droneData.ValueRW.BatteryLevel -= deltaTime * 0.05f * batteryEfficiency;
+                droneData.ValueRW.BatteryLevel -= deltaTime * 0.1f * batteryEfficiency * consumptionMultiplier;
 
                 // Kritik Şarj Kontrolü (Tek seferlik uyarı)
                 if (droneData.ValueRO.BatteryLevel < 0.2f)

@@ -78,8 +78,14 @@ namespace GalacticNexus.Scripts.Juice
 
                 case GameEventType.Warning:
                     // Task B: Low Battery Warning
-                    if (e.Value == 0f) // Battery alert indicator
+                    if (e.Value == 0f) 
                         SpawnFloatingText(e.Position, "CRITICAL POWER", true);
+                    // Task E: Meteor Response
+                    else if (e.Value == 1.0f)
+                        SpawnFloatingText(e.Position, "HAZARD HIT!", true);
+                    // Task I: Overclock Malfunction
+                    else if (e.Value == 2.0f)
+                        SpawnFloatingText(e.Position, "MALFUNCTION!", true);
                     else
                         SpawnFloatingText(e.Position, "WARNING", true);
                     break;

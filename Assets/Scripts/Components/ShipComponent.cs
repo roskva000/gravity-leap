@@ -17,6 +17,18 @@ namespace GalacticNexus.Scripts.Components
         public float Value;
     }
 
+    [UnityEngine.Rendering.MaterialProperty("_NeonColor")]
+    public struct NeonColorOverride : IComponentData
+    {
+        public float4 Value;
+    }
+
+    [UnityEngine.Rendering.MaterialProperty("_PulseSpeed")]
+    public struct PulseSpeedOverride : IComponentData
+    {
+        public float Value;
+    }
+
     public struct ShipData : IComponentData
     {
         public float Health;
