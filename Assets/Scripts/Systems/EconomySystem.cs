@@ -37,7 +37,9 @@ namespace GalacticNexus.Scripts.Systems
                     {
                         Type = GameEventType.ScrapEarned,
                         Position = SystemAPI.GetComponent<LocalTransform>(entity).Position,
-                        Value = (float)finalReward
+                        Value = (float)finalReward,
+                        // Task C: Magnitude calculated from CargoCapacity (assuming 1.0 is default, larger is multiplier)
+                        Scale = math.clamp(ship.ValueRO.CargoCapacity / 100f, 1f, 3f) 
                     });
 
                     // Gemiyi ayrılma durumuna geçir

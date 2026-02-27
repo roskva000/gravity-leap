@@ -32,13 +32,13 @@ namespace GalacticNexus.Scripts.UI
             originalScale = transform.localScale;
         }
 
-        public void SetTargetValue(double newValue)
+        public void SetTargetValue(double newValue, float magnitudeMultiplier = 1f)
         {
             if (Mathf.Approximately((float)targetValue, (float)newValue)) return;
             
             if (newValue > targetValue)
             {
-                StartPop();
+                StartPop(magnitudeMultiplier);
             }
             
             targetValue = newValue;
@@ -68,10 +68,13 @@ namespace GalacticNexus.Scripts.UI
             }
         }
 
-        private void StartPop()
+        private float currentPopScale = 1.25f;
+
+        private void StartPop(float magnitudeMultiplier = 1f)
         {
             isPopping = true;
             popTimer = popDuration;
+            currentPopScale = 1f + (popScale - 1f) * magnitudeMultiplier;
         }
 
         private void HandlePopAnimation()
@@ -85,7 +88,7 @@ namespace GalacticNexus.Scripts.UI
             float curve = Mathf.Sin(progress * Mathf.PI);
             
             // Scale animation
-            transform.localScale = originalScale * (1f + (popScale - 1f) * curve);
+            transform.localScale = originalScale * (1f + (currentPopScale - 1f) * curve);
 
             // Color / Glow animation
             if (scrapText != null)

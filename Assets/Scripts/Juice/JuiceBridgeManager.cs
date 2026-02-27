@@ -57,11 +57,27 @@ namespace GalacticNexus.Scripts.Juice
                 case GameEventType.ScrapEarned:
                     SpawnFloatingText(e.Position, $"+{e.Value:F0} SCRAP");
                     if (GlobalAudioSource && SellSound) GlobalAudioSource.PlayOneShot(SellSound);
+                    
+                    // Task C: Scale UI Pop
+                    var worldRef = World.DefaultGameObjectInjectionWorld;
+                    if (worldRef != null)
+                    {
+                        foreach (var uiRefs in worldRef.EntityManager.Query<GalacticNexus.Scripts.Components.UIReferencesComponent>())
+                        {
+                            if (uiRefs.ScrapJuice != null)
+                                uiRefs.ScrapJuice.SetTargetValue(e.Value, e.Scale); // Pass magnitude
+                        }
+                    }
+                    break;
+                    
+                case GameEventType.Warning:
+                    // Task B: Low Battery Warning
+                    SpawnFloatingText(e.Position, "LOW BATTERY", true);
                     break;
             }
         }
 
-        private void SpawnFloatingText(Vector3 pos, string text)
+        private void SpawnFloatingText(Vector3 pos, string text, bool isWarning = false)
         {
             if (!FloatingTextPrefab) return;
             
@@ -72,13 +88,11 @@ namespace GalacticNexus.Scripts.Juice
             if (go.TryGetComponent<FloatingTextJuice>(out var juice))
             {
                 juice.Initialize(text, floatingTextPool);
+                if (isWarning) juice.SetToWarning();
             }
             else
             {
-                // Eğer script yoksa fallback (ama plana göre ekledik)
                 go.GetComponentInChildren<TextMeshPro>().text = text;
-                // Bu durumda Release yönetimi zor olacağı için script olması şart
-                Debug.LogWarning("FloatingTextPrefab does not have FloatingTextJuice component!");
             }
         }
     }

@@ -67,7 +67,8 @@ namespace GalacticNexus.Scripts.Systems
             {
                 ShipsData = activeShipsData,
                 ShipsPositions = activeShipsPositions,
-                ShipsEntities = activeShipsEntities
+                ShipsEntities = activeShipsEntities,
+                ECB = SystemAPI.GetSingleton<BeginSimulationEntityCommandBufferSystem.Singleton>().CreateCommandBuffer(state.WorldUnmanaged).AsParallelWriter()
             };
 
             state.Dependency = droneJob.ScheduleParallel(state.Dependency);
@@ -85,11 +86,27 @@ namespace GalacticNexus.Scripts.Systems
         [ReadOnly] public NativeArray<ShipData> ShipsData;
         [ReadOnly] public NativeArray<float3> ShipsPositions;
         [ReadOnly] public NativeArray<Entity> ShipsEntities;
+        public EntityCommandBuffer.ParallelWriter ECB;
 
-        public void Execute(RefRW<DroneData> droneData, in LocalTransform droneTransform)
+        public void Execute(Entity entity, [ChunkIndexInQuery] int chunkIndex, RefRW<DroneData> droneData, in LocalTransform droneTransform)
         {
             // Drone meşgulse veya şarjı azsa atla
-            if (droneData.ValueRO.IsBusy || droneData.ValueRO.BatteryLevel < 0.2f || droneData.ValueRO.CurrentState == DroneState.Charging) return;
+            if (droneData.ValueRO.IsBusy || droneData.ValueRO.CurrentState == DroneState.Charging) return;
+
+            // Task B: Low Battery Warning trigger
+            if (droneData.ValueRO.BatteryLevel < 0.2f)
+            {
+                droneData.ValueRW.CurrentState = DroneState.Charging;
+                
+                // Fire Low Battery Warning Event
+                ECB.AddComponent(chunkIndex, ECB.CreateEntity(chunkIndex), new GameEvent
+                {
+                    Type = GameEventType.Warning,
+                    Position = droneTransform.Position,
+                    Value = 0f // 0 for battery warning
+                });
+                return;
+            }
 
             Entity bestTarget = Entity.Null;
             float bestScore = -1f;
@@ -121,7 +138,8 @@ namespace GalacticNexus.Scripts.Systems
             float distance = math.distance(dronePos, shipPos);
             float distanceFactor = math.clamp(1.0f - (distance / 100f), 0, 1);
             
-            float fractionPriority = ship.OwnerFraction == Fraction.VoidWalkers ? 1.2f : 1.0f;
+            // Task B: Increased priority for VoidWalkers (1.2 -> 1.5)
+            float fractionPriority = ship.OwnerFraction == Fraction.VoidWalkers ? 1.5f : 1.0f;
             float urgency = (1.0f - ship.Fuel) + (1.0f - ship.RepairProgress);
             
             return (distanceFactor * 0.4f) + (urgency * 0.4f) * fractionPriority;

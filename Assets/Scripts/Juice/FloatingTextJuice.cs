@@ -84,5 +84,12 @@ namespace GalacticNexus.Scripts.Juice
                 textMesh.color = c;
             }
         }
+        public void SetToWarning()
+        {
+            if (textMesh != null)
+            {
+                textMesh.color = Color.red;
+            }
+        }
     }
 }

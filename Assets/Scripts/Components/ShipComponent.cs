@@ -5,6 +5,18 @@ namespace GalacticNexus.Scripts.Components
 {
     public struct ShipTag : IComponentData { }
 
+    [UnityEngine.Rendering.MaterialProperty("_RustAmount")]
+    public struct RustAmountOverride : IComponentData
+    {
+        public float Value;
+    }
+
+    [UnityEngine.Rendering.MaterialProperty("_NeonPower")]
+    public struct NeonPowerOverride : IComponentData
+    {
+        public float Value;
+    }
+
     public struct ShipData : IComponentData
     {
         public float Health;

@@ -8,7 +8,8 @@ namespace GalacticNexus.Scripts.Juice
         ShipDocked,
         ServiceFinished,
         ScrapEarned,
-        DroneBoost
+        DroneBoost,
+        Warning
     }
 
     public struct GameEvent : IComponentData
@@ -16,5 +17,6 @@ namespace GalacticNexus.Scripts.Juice
         public GameEventType Type;
         public float3 Position;
         public float Value;
+        public float Scale;
     }
 }
