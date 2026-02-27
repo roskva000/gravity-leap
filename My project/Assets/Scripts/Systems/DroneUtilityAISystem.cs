@@ -167,3 +167,4 @@ namespace GalacticNexus.Scripts.Systems
             return (distanceFactor * 0.4f) + (urgency * 0.4f) * fractionPriority;
         }
     }
+}
