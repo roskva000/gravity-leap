@@ -3,16 +3,34 @@ using Unity.Entities;
 using Unity.Transforms;
 using Unity.Mathematics;
 using GalacticNexus.Scripts.Components;
+using Unity.Collections;
 
 namespace GalacticNexus.Scripts.Systems
 {
     [BurstCompile]
     public partial struct SpawningSystem : ISystem
     {
+        private EntityQuery _waitingShipsQuery;
+
+        public void OnCreate(ref SystemState state)
+        {
+            _waitingShipsQuery = state.GetEntityQuery(ComponentType.ReadOnly<ShipData>(), ComponentType.ReadOnly<ShipTag>());
+        }
+
         [BurstCompile]
         public void OnUpdate(ref SystemState state)
         {
             float currentTime = (float)SystemAPI.Time.ElapsedTime;
+            if (!SystemAPI.TryGetSingleton<UpgradeData>(out var upgrade)) return;
+
+            // Bekleyen gemi sayısını kontrol et
+            int waitingCount = 0;
+            var ships = _waitingShipsQuery.ToComponentDataArray<ShipData>(Unity.Collections.Allocator.Temp);
+            foreach(var s in ships) if(s.CurrentState == ShipState.Waiting) waitingCount++;
+            ships.Dispose();
+
+            // Havuz limiti: 5 gemiden fazla bekleyen varsa spawning'i durdur
+            if (waitingCount >= 5) return;
 
             foreach (var spawner in SystemAPI.Query<RefRW<SpawnerData>>())
             {
@@ -50,8 +68,11 @@ namespace GalacticNexus.Scripts.Systems
                         FractionMultiplier = (randomFraction == Fraction.VoidWalkers) ? 1.5f : 1.0f
                     });
 
-                    // Bir sonraki spawn zamanını belirle
-                    spawner.ValueRW.NextSpawnTime = currentTime + spawner.ValueRO.SpawnInterval;
+                    // Bir sonraki spawn zamanını belirle (Dinamik Trafik)
+                    float dynamicInterval = spawner.ValueRO.SpawnInterval / (1.0f + (upgrade.DockLevel * 0.25f));
+                    dynamicInterval = math.max(1.5f, dynamicInterval); // Hard-cap limit
+
+                    spawner.ValueRW.NextSpawnTime = currentTime + dynamicInterval;
                 }
             }
         }

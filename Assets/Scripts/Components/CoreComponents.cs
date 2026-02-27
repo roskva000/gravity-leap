@@ -5,9 +5,17 @@ namespace GalacticNexus.Scripts.Components
 {
     public struct DroneTag : IComponentData { }
 
+    public enum DroneState
+    {
+        Idle,
+        Working,
+        Charging
+    }
+
     public struct DroneData : IComponentData
     {
         public float BatteryLevel;
+        public DroneState CurrentState;
         public float Speed;
         public float3 TargetPosition;
         public Entity CurrentTargetEntity;

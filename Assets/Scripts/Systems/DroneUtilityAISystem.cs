@@ -18,7 +18,7 @@ namespace GalacticNexus.Scripts.Systems
             // Boştaki drone'ları bul
             foreach (var (droneData, droneEntity, droneTransform) in SystemAPI.Query<RefRW<DroneData>, Entity, RefRO<LocalTransform>>().WithAll<DroneTag>())
             {
-                if (droneData.ValueRO.IsBusy) continue;
+                if (droneData.ValueRO.IsBusy || droneData.ValueRO.BatteryLevel < 0.2f || droneData.ValueRO.CurrentState == DroneState.Charging) continue;
 
                 Entity bestTarget = Entity.Null;
                 float bestScore = -1f;
@@ -41,6 +41,7 @@ namespace GalacticNexus.Scripts.Systems
                 {
                     droneData.ValueRW.CurrentTargetEntity = bestTarget;
                     droneData.ValueRW.IsBusy = true;
+                    droneData.ValueRW.CurrentState = DroneState.Working;
                     // Hedef geminin koordinatını al (basitleştirilmiş)
                     droneData.ValueRW.TargetPosition = SystemAPI.GetComponent<LocalTransform>(bestTarget).Position;
                 }
