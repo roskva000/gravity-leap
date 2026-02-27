@@ -9,6 +9,8 @@ Shader "Universal Render Pipeline/Custom/RustAndNeon"
         _NeonPower("Neon Power", Range(0, 10)) = 1.0
         _RustAmount("Rust Amount", Range(0, 1)) = 0.5
         _BumpMap("Normal Map", 2D) = "bump" {}
+        _PulseSpeed("Pulse Speed", Float) = 2.0
+        _PulseIntensity("Pulse Intensity", Range(0, 1)) = 0.5
     }
 
     SubShader
@@ -51,6 +53,8 @@ Shader "Universal Render Pipeline/Custom/RustAndNeon"
                 float4 _NeonColor;
                 float _NeonPower;
                 float _RustAmount;
+                float _PulseSpeed;
+                float _PulseIntensity;
             CBUFFER_END
 
             Varyings vert(Attributes input)
@@ -72,7 +76,10 @@ Shader "Universal Render Pipeline/Custom/RustAndNeon"
 
                 // Basit Neon parlaması (Kenar aydınlatması / Fresnel benzeri)
                 float fresnel = 1.0 - saturate(dot(normalize(input.normalWS), float3(0, 0, 1)));
-                half3 glow = _NeonColor.rgb * pow(fresnel, 3.0) * _NeonPower;
+                
+                // Nabız (Pulse) hesaplaması
+                float pulse = sin(_Time.y * _PulseSpeed) * _PulseIntensity + (1.0 - _PulseIntensity);
+                half3 glow = _NeonColor.rgb * pow(fresnel, 3.0) * _NeonPower * pulse;
 
                 return half4(finalColor + glow, 1.0);
             }

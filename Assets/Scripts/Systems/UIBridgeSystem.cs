@@ -13,8 +13,7 @@ namespace GalacticNexus.Scripts.Systems
             // UI referanslarını al (Managed component olduğu için SystemAPI.Query kullanıyoruz)
             foreach (var uiRefs in SystemAPI.Query<UIReferencesComponent>())
             {
-                if (uiRefs.ScrapText != null)
-                    uiRefs.ScrapText.SetText($"SCRAP: {economy.ScrapCurrency:F0}");
+                uiRefs.TargetScrap = economy.ScrapCurrency;
                 
                 if (uiRefs.GemsText != null)
                     uiRefs.GemsText.SetText($"GEMS: {economy.TotalShipsServiced}"); // Şimdilik gems yerine servis sayısı
